@@ -11,7 +11,7 @@ const productDetails = document.querySelector('#product-details');
 const isAdmin = localStorage.getItem('chocolifeUserRole') === 'admin';
 const backLink = isAdmin
     ? '<a href="product.html">Back to products</a>'
-    : '<a href="user-home.html">Back to offers</a>';
+    : '<a href="user-home.php">Back to offers</a>';
 
 if (!product) {
     productDetails.innerHTML = `

@@ -1,48 +1,16 @@
+<?php
+require __DIR__ . '/includes/page.php';
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+$user = requirePageLogin();
 
-    <title>Chocolife | Home</title>
+$pageTitle   = 'Home';
+$activePage  = 'home';
+$pageCss     = ['user-home.css'];
+$pageScripts = ['products-data.js', 'user-home.js'];
 
-    <link rel="stylesheet" href="user-home.css">
+require __DIR__ . '/includes/header.php';
+?>
 
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
-
-    <link rel="stylesheet" href="auth.css">
-    <link rel="stylesheet" href="brand-theme.css">
-</head>
-<body>
-
-    <header class="user-header">
-    
-        <a href="user-home.html" class="brand">
-            <span class="brand-text">chocolife</span><span class="brand-heart">.me♥</span>
-        </a>
-
-
-        <nav class="user-nav">
-            <a href="user-home.html" class="active">Home</a>
-            <a href="#offers">Offers</a>
-            <a href="#categories">Categories</a>
-            
-        </nav>
-
-        <div class="user-actions">
-            <a href="cart.html" class="cart-link">
-                <span class="material-symbols-outlined">shopping_cart</span>
-                Cart
-                <span id="cart-badge">0</span>
-            </a>
-            <a href="profile.html" class="profile-nav-link">My Profile</a>
-            <span class="material-symbols-outlined">person</span>
-            <span id="user-name">User</span>
-            <button id="logout-button">Logout</button>
-        </div>
-    </header>
 
     <main>
 
@@ -147,15 +115,7 @@
 
     </main>
 
-    <footer class="user-footer">
-        <a href="user-home.html" class="brand brand-logo">
-            <span class="brand-text">chocolife</span>
-            <span class="brand-heart">.me</span>
-        </a>
-    </footer>
+<?php require __DIR__ . '/includes/footer.php'; ?>
 
-    <script src="products-data.js"></script>
-    <script src="user-home.js"></script>
 
-</body>
-</html>
+    

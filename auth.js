@@ -44,7 +44,7 @@ if (loginForm) {
             }));
 
             window.location.href =
-                user.role === 'admin' ? 'index.html' : 'user-home.html';
+                user.role === 'admin' ? 'index.html' : 'user-home.php';
         } catch (error) {
             message.textContent = 'Could not connect to the server.';
         }

@@ -47,7 +47,7 @@ function renderCart() {
             <div class="empty-cart">
                 <h2>Your cart is empty</h2>
                 <p>Add some offers to get started.</p>
-                <a href="user-home.html">Browse offers</a>
+                <a href="user-home.php">Browse offers</a>
             </div>
         `;
 

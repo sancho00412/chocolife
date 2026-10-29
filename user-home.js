@@ -1,28 +1,3 @@
-
-let currentUser = null;
-
-try {
-    currentUser = JSON.parse(localStorage.getItem('chocolifeCurrentUser'));
-} catch {
-    currentUser = null;
-}
-
-// Require login
-if (!currentUser) {
-    window.location.href = 'login.html';
-} else {
-    document.querySelector('#user-name').textContent =
-        `${currentUser.firstName} ${currentUser.lastName}`;
-}
-
-// Logout
-document.querySelector('#logout-button').addEventListener('click', () => {
-    localStorage.removeItem('chocolifeCurrentUser');
-    localStorage.removeItem('chocolifeUserRole');
-    window.location.href = 'welcome.html';
-});
-
-
 const products = loadProducts();
 const userProducts = document.querySelector('#user-products');
 const searchInput = document.querySelector('#user-product-search');

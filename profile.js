@@ -71,7 +71,7 @@ if (!currentUser || !currentUser.email) {
                 <div class="profile-empty-orders">
                     <span class="material-symbols-outlined">shopping_bag</span>
                     <p>You haven't placed any orders with this account yet.</p>
-                    <a href="user-home.html#offers">Explore offers</a>
+                    <a href="user-home.php#offers">Explore offers</a>
                 </div>
             `;
             return;
