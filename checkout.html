@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Chocolife</title>
+
+    <link rel="stylesheet" href="./checkout.css">
+
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="brand-theme.css">
+
+
+</head>
+
+<body>
+
+    <main class="checkout-page">
+        <a href="cart.html" class="back-link">
+            ← Back to Cart
+        </a>
+
+        <h1>Checkout</h1>
+        <p class="page-description">Complete your order details below.</p>
+
+        <div class="checkout-layout">
+
+            <section class="checkout-card">
+                <h2>Contact Information</h2>
+
+                <form id="checkout-form" novalidate>
+                    <div class="form-group">
+                        <label for="customer-name">Full Name</label>
+                        <input
+                            type="text"
+                            id="customer-name"
+                            name="customerName"
+                            placeholder="Enter your full name"
+                            required
+                        >
+                        <small class="field-error" id="name-error"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customer-email">Email</label>
+                        <input
+                            type="email"
+                            id="customer-email"
+                            name="email"
+                            placeholder="example@email.com"
+                            required
+                        >
+                        <small class="field-error" id="email-error"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customer-phone">Phone Number</label>
+                        <input
+                            type="tel"
+                            id="customer-phone"
+                            name="phone"
+                            placeholder="+7 700 123 45 67"
+                            required
+                        >
+                        <small class="field-error" id="phone-error"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customer-address">Address</label>
+                        <textarea
+                            id="customer-address"
+                            name="address"
+                            rows="3"
+                            placeholder="Enter your address"
+                            required
+                        ></textarea>
+                        <small class="field-error" id="address-error"></small>
+                    </div>
+
+                    <button type="submit" id="place-order-button">
+                        Place Order
+                    </button>
+
+                    <p id="checkout-message" role="status"></p>
+                </form>
+            </section>
+
+            <aside class="checkout-summary">
+                <h2>Your Order</h2>
+
+                <div id="checkout-items"></div>
+
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span id="checkout-total">0 ₸</span>
+                </div>
+            </aside>
+
+        </div>
+    </main>
+
+    <script src="./checkout.js"></script>
+
+</body>
+</html>

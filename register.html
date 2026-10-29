@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Account | Chocolife</title>
+
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="brand-theme.css">
+</head>
+<body>
+
+    <header class="auth-header">
+        <a href="welcome.html" class="brand brand-logo">
+            <span class="brand-text">chocolife</span>
+            <span class="brand-heart">.me</span>
+        </a>
+
+        <a href="login.html" class="header-link">
+            Already have an account? Login
+        </a>
+    </header>
+
+    <main class="auth-main">
+
+        <section class="auth-card">
+
+            <div class="auth-icon">
+                <span class="material-symbols-outlined">person_add</span>
+            </div>
+
+            <h1>Create Account</h1>
+
+            <p class="auth-description">
+                Join Chocolife and discover amazing offers.
+            </p>
+
+            <form id="register-form">
+
+                <div class="form-group">
+                    <label for="first-name">First Name</label>
+                    <input
+                        type="text"
+                        id="first-name"
+                        placeholder="Enter your first name"
+                        required
+                    >
+                    <small class="field-error" id="first-name-error"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="last-name">Last Name</label>
+                    <input
+                        type="text"
+                        id="last-name"
+                        placeholder="Enter your last name"
+                        required
+                    >
+                    <small class="field-error" id="last-name-error"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="example@email.com"
+                        required
+                    >
+                    <small class="field-error" id="email-error"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="At least 8 characters"
+                        minlength="8"
+                        required
+                    >
+                    <small class="field-error" id="password-error"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input
+                        type="password"
+                        id="confirm-password"
+                        placeholder="Repeat your password"
+                        required
+                    >
+                    <small class="field-error" id="confirm-password-error"></small>
+                </div>
+
+                <p id="register-message" class="form-message"></p>
+
+                <button type="submit" class="auth-button">
+                    Create Account
+                </button>
+
+            </form>
+
+            <p class="auth-switch">
+                Already registered?
+                <a href="login.html">Login here</a>
+            </p>
+
+        </section>
+
+    </main>
+
+    <footer class="auth-footer">
+        © 2026 Chocolife. All rights reserved.
+    </footer>
+
+    <script src="auth.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | Chocolife</title>
+
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="brand-theme.css">
+</head>
+<body>
+
+    <header class="auth-header">
+        <a href="welcome.html" class="brand brand-logo">
+            <span class="brand-text">chocolife</span>
+            <span class="brand-heart">.me</span>
+        </a>
+
+        <a href="register.html" class="header-link">
+            Create Account
+        </a>
+    </header>
+
+    <main class="auth-main">
+
+        <section class="auth-card">
+
+            <div class="auth-icon">
+                <span class="material-symbols-outlined">login</span>
+            </div>
+
+            <h1>Welcome Back!</h1>
+
+            <p class="auth-description">
+                Sign in to continue exploring Chocolife.
+            </p>
+
+            <form id="login-form">
+
+                <div class="form-group">
+                    <label for="login-email">Email Address</label>
+
+                    <input
+                        type="email"
+                        id="login-email"
+                        placeholder="example@email.com"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+
+                    <input
+                        type="password"
+                        id="login-password"
+                        placeholder="Enter your password"
+                        required
+                    >
+                </div>
+
+                <p id="login-message" class="form-message"></p>
+
+                <button type="submit" class="auth-button">
+                    Login
+                </button>
+
+            </form>
+
+            <p class="auth-switch">
+                Don't have an account?
+                <a href="register.html">Register here</a>
+            </p>
+
+        </section>
+
+    </main>
+
+    <footer class="auth-footer">
+        © 2026 Chocolife. All rights reserved.
+    </footer>
+
+    <script src="auth.js"></script>
+
+</body>
+</html>

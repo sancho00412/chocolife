@@ -1,0 +1,291 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    color: #20243a;
+    background: #f7f8fc;
+}
+
+/* Header */
+
+.auth-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 7%;
+    background: white;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.04);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: #20243a;
+    text-decoration: none;
+}
+
+.brand .material-symbols-outlined {
+    padding: 0.6rem;
+    border-radius: 12px;
+    background: #6268ed;
+    color: white;
+    font-size: 1.8rem;
+}
+
+.brand h2 {
+    font-size: 1.7rem;
+}
+
+.header-link,
+.auth-switch a {
+    color: #6268ed;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.header-link:hover,
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+/* Main */
+
+.auth-main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 1rem;
+    background:
+        radial-gradient(circle at 10% 15%, #e9eaff, transparent 35%),
+        radial-gradient(circle at 90% 85%, #ffe9d8, transparent 30%),
+        #f7f8fc;
+}
+
+/* Card */
+
+.auth-card {
+    width: 100%;
+    max-width: 480px;
+    padding: 2.5rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 35px rgba(32, 36, 58, 0.07);
+}
+
+.auth-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.2rem;
+    border-radius: 50%;
+    background: #eef0ff;
+    color: #6268ed;
+}
+
+.auth-icon .material-symbols-outlined {
+    font-size: 2rem;
+}
+
+.auth-card h1 {
+    text-align: center;
+    margin-bottom: 0.7rem;
+    font-size: 1.8rem;
+}
+
+.auth-description {
+    margin-bottom: 2rem;
+    text-align: center;
+    color: #687086;
+    line-height: 1.6;
+}
+
+/* Form */
+
+#register-form,
+#login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: 1px solid #dfe2ed;
+    border-radius: 10px;
+    background: #fafbff;
+    color: #20243a;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #6268ed;
+    box-shadow: 0 0 0 3px rgba(98, 104, 237, 0.12);
+}
+
+.field-error {
+    color: #e74c3c;
+    font-size: 0.82rem;
+}
+
+.form-message {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.auth-button {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 10px;
+    background: #6268ed;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.auth-button:hover {
+    background: #4c52d5;
+}
+
+.auth-switch {
+    margin-top: 1.5rem;
+    text-align: center;
+    color: #687086;
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+/* Footer */
+
+.auth-footer {
+    padding: 1.3rem;
+    background: white;
+    color: #777e9c;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+/* Mobile */
+
+@media (max-width: 500px) {
+    .auth-header {
+        padding: 1rem 5%;
+        gap: 1rem;
+    }
+
+    .brand h2 {
+        font-size: 1.3rem;
+    }
+
+    .header-link {
+        font-size: 0.8rem;
+        text-align: right;
+    }
+
+    .auth-card {
+        padding: 1.5rem;
+    }
+
+    .auth-card h1 {
+        font-size: 1.5rem;
+    }
+}
+
+
+.brand-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    text-decoration: none;
+}
+
+.brand-logo .brand-text {
+    color: #303f8c;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+}
+
+.brand-logo .brand-heart {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 47px;
+    height: 43px;
+    margin-left: 5px;
+    border-radius: 50% 50% 45% 45%;
+    background: #f52d50;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+@media (max-width: 600px) {
+    .brand-logo .brand-text {
+        font-size: 25px;
+    }
+
+    .brand-logo .brand-heart {
+        width: 38px;
+        height: 36px;
+        font-size: 14px;
+    }
+}
+
+
+html,
+body {
+    background: #ffffff !important;
+    background-image: none !important;
+}
+
+body,
+body > *,
+.auth-page,
+.auth-main,
+.auth-container,
+.auth-wrapper,
+.auth-layout,
+.auth-section,
+.auth-content,
+.auth-form-container,
+.auth-card,
+.auth-hero {
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+
+.auth-card,
+.auth-form-container {
+    box-shadow: 0 16px 50px rgba(32, 39, 68, 0.09);
+}

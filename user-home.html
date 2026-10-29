@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Chocolife | Home</title>
+
+    <link rel="stylesheet" href="user-home.css">
+
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="brand-theme.css">
+</head>
+<body>
+
+    <header class="user-header">
+    
+        <a href="user-home.html" class="brand">
+            <span class="brand-text">chocolife</span><span class="brand-heart">.me♥</span>
+        </a>
+
+
+        <nav class="user-nav">
+            <a href="user-home.html" class="active">Home</a>
+            <a href="#offers">Offers</a>
+            <a href="#categories">Categories</a>
+            
+        </nav>
+
+        <div class="user-actions">
+            <a href="cart.html" class="cart-link">
+                <span class="material-symbols-outlined">shopping_cart</span>
+                Cart
+                <span id="cart-badge">0</span>
+            </a>
+            <a href="profile.html" class="profile-nav-link">My Profile</a>
+            <span class="material-symbols-outlined">person</span>
+            <span id="user-name">User</span>
+            <button id="logout-button">Logout</button>
+        </div>
+    </header>
+
+    <main>
+
+        <section class="user-hero">
+            <div class="hero-content">
+                <p class="eyebrow">YOUR CITY. YOUR EXPERIENCES.</p>
+
+                <h1>
+                    Discover something
+                    <span>amazing today.</span>
+                </h1>
+
+                <p>
+                    Restaurants, wellness, entertainment and travel
+                    experiences — all in one place.
+                </p>
+
+                <a href="#offers" class="user-primary-button">
+                    Explore offers
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </a>
+            </div>
+
+            <div class="hero-decoration">
+                <span class="material-symbols-outlined">favorite</span>
+            </div>
+        </section>
+
+        <section class="user-section" id="categories">
+            
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">BROWSE BY INTEREST</p>
+                    <h2>Categories</h2>
+                </div>
+            </div>
+
+            <div class="user-product-filters">
+                <div class="user-search-box">
+                    <span class="material-symbols-outlined">search</span>
+                    <input
+                        type="search"
+                        id="user-product-search"
+                        placeholder="Search offers..."
+                        autocomplete="off"
+                    >
+                </div>
+
+                <select id="user-category-filter">
+                    <option value="All">All Categories</option>
+                    <option value="Beauty">Beauty</option>
+                    <option value="Food">Food</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Travel">Travel</option>
+                    <option value="Fitness">Fitness</option>
+                </select>
+            </div>
+
+            <p id="user-no-results" class="user-no-results" hidden>
+                No offers found. Try another search or category.
+            </p>
+
+            <div class="category-grid">
+
+                <article class="category-card">
+                    <span class="material-symbols-outlined">restaurant</span>
+                    <h3>Restaurants</h3>
+                    <p>Discover new places to eat.</p>
+                </article>
+
+                <article class="category-card">
+                    <span class="material-symbols-outlined">spa</span>
+                    <h3>Beauty & Spa</h3>
+                    <p>Take time for yourself.</p>
+                </article>
+
+                <article class="category-card">
+                    <span class="material-symbols-outlined">movie</span>
+                    <h3>Entertainment</h3>
+                    <p>Make your free time special.</p>
+                </article>
+
+                <article class="category-card">
+                    <span class="material-symbols-outlined">flight</span>
+                    <h3>Travel</h3>
+                    <p>Find your next adventure.</p>
+                </article>
+
+            </div>
+        </section>
+
+        <section class="user-section" id="offers">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">HANDPICKED FOR YOU</p>
+                    <h2>Popular Offers</h2>
+                </div>
+            </div>
+
+            <div id="user-products" class="user-product-grid"></div>
+        </section>
+
+    </main>
+
+    <footer class="user-footer">
+        <a href="user-home.html" class="brand brand-logo">
+            <span class="brand-text">chocolife</span>
+            <span class="brand-heart">.me</span>
+        </a>
+    </footer>
+
+    <script src="products-data.js"></script>
+    <script src="user-home.js"></script>
+
+</body>
+</html>

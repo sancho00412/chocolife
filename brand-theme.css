@@ -1,0 +1,175 @@
+
+:root {
+    --chocolife-red: #f5234b;
+    --chocolife-red-hover: #d91d40;
+    --chocolife-red-light: #fff0f3;
+}
+
+/* Highlighted hero headings */
+.hero h1 span,
+.hero h1 .highlight,
+.hero .highlight,
+.hero .eyebrow,
+.hero .kicker,
+.hero .hero-subtitle-highlight {
+    color: var(--chocolife-red) !important;
+}
+
+/* Active navigation links */
+nav a.active,
+nav a[aria-current="page"],
+.nav-links a.active,
+.nav-link.active {
+    color: var(--chocolife-red) !important;
+}
+
+/* Main action buttons */
+button,
+input[type="submit"],
+.auth-button,
+[class*="add-to-cart"],
+[class*="checkout-button"],
+[class*="place-order"],
+[class*="explore-btn"],
+[class*="primary-btn"],
+[class*="btn-primary"] {
+    --button-accent: var(--chocolife-red);
+}
+
+/* Red action buttons */
+.auth-button,
+.add-to-cart-btn,
+.add-to-cart,
+#add-to-cart,
+.checkout-button,
+.place-order-btn,
+.explore-btn,
+.btn-primary,
+.primary-btn,
+[class*="cart-button"],
+[class*="cart-btn"],
+[class*="explore-btn"] {
+    background-color: var(--chocolife-red) !important;
+    border-color: var(--chocolife-red) !important;
+}
+
+/* Hover state */
+.auth-button:hover,
+.add-to-cart-btn:hover,
+.add-to-cart:hover,
+#add-to-cart:hover,
+.checkout-button:hover,
+.place-order-btn:hover,
+.explore-btn:hover,
+.btn-primary:hover,
+.primary-btn:hover,
+[class*="cart-button"]:hover,
+[class*="cart-btn"]:hover,
+[class*="explore-btn"]:hover {
+    background-color: var(--chocolife-red-hover) !important;
+    border-color: var(--chocolife-red-hover) !important;
+}
+
+/* Cart navigation button */
+a[class*="cart"],
+button[class*="cart"] {
+    background-color: var(--chocolife-red) !important;
+    border-color: var(--chocolife-red) !important;
+}
+
+/* Cart counter */
+.cart-count,
+.cart-badge,
+.cart-link span {
+    accent-color: var(--chocolife-red);
+}
+
+/* Hero decorative icons */
+.hero svg,
+.hero-icon,
+.hero-heart,
+.heart-icon {
+    color: var(--chocolife-red) !important;
+    stroke: var(--chocolife-red) !important;
+}
+
+/* Form focus */
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--chocolife-red) !important;
+    outline-color: var(--chocolife-red);
+}
+
+/* Checkboxes and radio buttons */
+input[type="checkbox"],
+input[type="radio"] {
+    accent-color: var(--chocolife-red);
+}
+
+/* Welcome page — replace blue accents with red */
+
+/* Highlighted word in the heading */
+main h1 span,
+main h1 .highlight {
+    color: #f5234b !important;
+}
+
+/* User icon */
+main .welcome-icon,
+main .auth-icon {
+    background-color: #fff0f3 !important;
+}
+
+main .welcome-icon span,
+main .auth-icon span {
+    color: #f5234b !important;
+}
+
+/* Main action buttons and links styled as buttons */
+main button,
+main input[type="submit"],
+main a[class*="btn"],
+main a[class*="button"],
+main .auth-button,
+main .primary-btn,
+main .btn-primary {
+    background-color: #f5234b !important;
+    border-color: #f5234b !important;
+}
+
+/* Hover */
+main button:hover,
+main input[type="submit"]:hover,
+main a[class*="btn"]:hover,
+main a[class*="button"]:hover,
+main .auth-button:hover,
+main .primary-btn:hover,
+main .btn-primary:hover {
+    background-color: #d91d40 !important;
+    border-color: #d91d40 !important;
+}
+
+/* Decorative icons */
+main .hero-icon,
+main .heart-icon {
+    color: #f5234b !important;
+    stroke: #f5234b !important;
+}
+
+/* White text inside red buttons */
+.auth-button,
+.add-to-cart-btn,
+.add-to-cart,
+#add-to-cart,
+.checkout-button,
+.place-order-btn,
+.explore-btn,
+.btn-primary,
+.primary-btn,
+button,
+input[type="submit"],
+a[class*="btn"],
+a[class*="button"] {
+    color: #fff !important;
+}
