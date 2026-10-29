@@ -60,6 +60,18 @@ function requireLogin(): array
     return $user;
 }
 
+// Cart and orders are only for customers, not for admins
+function requireCustomer(): array
+{
+    $user = requireLogin();
+
+    if ($user['role'] !== 'user') {
+        sendError('This action is available only for customers.', 403);
+    }
+
+    return $user;
+}
+
 function requireAdmin(): array
 {
     $user = requireLogin();

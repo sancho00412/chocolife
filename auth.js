@@ -9,6 +9,22 @@ async function postJson(url, data) {
     return response.json();
 }
 
+function homePageFor(user) {
+    return user.role === 'admin' ? 'admin.php' : 'user-home.php';
+}
+
+// A logged-in user does not need the login and register pages
+fetch('api/me.php')
+    .then(response => response.json())
+    .then(result => {
+        if (result.user) {
+            window.location.href = homePageFor(result.user);
+        }
+    })
+    .catch(() => {
+        // Server is not available, the form will show the error on submit
+    });
+
 const loginForm = document.querySelector('#login-form');
 
 if (loginForm) {
@@ -32,19 +48,7 @@ if (loginForm) {
                 return;
             }
 
-            const user = result.user;
-
-            // Temporary: other pages still read these keys.
-            // They will be removed when those pages move to the API.
-            localStorage.setItem('chocolifeUserRole', user.role);
-            localStorage.setItem('chocolifeCurrentUser', JSON.stringify({
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email
-            }));
-
-            window.location.href =
-                user.role === 'admin' ? 'index.html' : 'user-home.php';
+            window.location.href = homePageFor(result.user);
         } catch (error) {
             message.textContent = 'Could not connect to the server.';
         }
@@ -67,8 +71,21 @@ if (registerForm) {
         message.style.color = '#e74c3c';
         message.textContent = '';
 
-        if (password !== confirmPassword) {
-            message.textContent = 'Passwords do not match.';
+        // Client-side validation, the server checks the same rules again
+        const errors = {
+            'first-name': firstName.length < 2 ? 'At least 2 characters.' : '',
+            'last-name': lastName.length < 2 ? 'At least 2 characters.' : '',
+            'email': /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? '' : 'Enter a valid email address.',
+            'password': password.length < 8 ? 'At least 8 characters.' : '',
+            'confirm-password': password !== confirmPassword ? 'Passwords do not match.' : ''
+        };
+
+        Object.entries(errors).forEach(([field, text]) => {
+            document.querySelector(`#${field}-error`).textContent = text;
+        });
+
+        if (Object.values(errors).some(text => text !== '')) {
+            message.textContent = 'Please fix the errors above.';
             return;
         }
 

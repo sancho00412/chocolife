@@ -1,0 +1,2 @@
+# Files in this folder are used by PHP only and are never opened in the browser
+Require all denied

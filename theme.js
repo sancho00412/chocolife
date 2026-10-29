@@ -25,18 +25,28 @@ applyTheme(isDarkTheme());
 document.addEventListener('DOMContentLoaded', () => {
     applyTheme(isDarkTheme());
 
+    function toggleTheme() {
+        const dark =
+            !document.documentElement.classList.contains('dark-theme-variables');
+
+        try {
+            localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+        } catch {
+            // Storage unavailable: theme still switches for this page.
+        }
+
+        applyTheme(dark);
+    }
+
     document.querySelectorAll('.theme-toggler').forEach(toggler => {
-        toggler.addEventListener('click', () => {
-            const dark =
-                !document.documentElement.classList.contains('dark-theme-variables');
+        toggler.addEventListener('click', toggleTheme);
 
-            try {
-                localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
-            } catch {
-                // Storage unavailable: theme still switches for this page.
+        // The switch also works from the keyboard
+        toggler.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                toggleTheme();
             }
-
-            applyTheme(dark);
         });
     });
 });

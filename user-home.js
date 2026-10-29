@@ -12,14 +12,9 @@ let currentPage = 1;
 let searchTimer = null;
 let lastRequestId = 0;
 
-function formatPrice(price) {
-    return price.toLocaleString('en-US') + ' ₸';
-}
-
 async function loadCategories() {
     try {
-        const response = await fetch('api/categories.php');
-        const result = await response.json();
+        const result = await requestJson('api/categories.php');
 
         if (!result.success) {
             return;
@@ -54,8 +49,7 @@ async function loadProducts() {
     userProducts.classList.add('loading');
 
     try {
-        const response = await fetch(`api/products.php?${params}`);
-        const result = await response.json();
+        const result = await requestJson(`api/products.php?${params}`);
 
         if (requestId !== lastRequestId) {
             return;
@@ -145,9 +139,11 @@ function renderProducts(products) {
 
         const status = document.createElement('span');
         status.className = 'user-product-status';
-        status.textContent = product.status;
+        // An available offer with no coupons left is shown as sold out
+        const soldOut = product.status === 'Available' && product.stock === 0;
+        status.textContent = soldOut ? 'Sold out' : product.status;
 
-        if (product.status !== 'Available') {
+        if (product.status !== 'Available' || soldOut) {
             status.classList.add('unavailable');
         }
 
@@ -155,17 +151,7 @@ function renderProducts(products) {
         card.append(image, info);
 
         const openProduct = () => {
-            // Temporary: product-details still reads the product from localStorage
-            localStorage.setItem('selectedProduct', JSON.stringify({
-                productNumber: product.productNumber,
-                productName: product.name,
-                price: formatPrice(product.price),
-                category: product.category,
-                status: product.status,
-                description: product.description,
-                image: product.image || ''
-            }));
-            window.location.href = 'product-details.html';
+            window.location.href = `offer.php?id=${product.id}`;
         };
 
         card.addEventListener('click', openProduct);
@@ -234,22 +220,15 @@ sortSelect.addEventListener('change', () => {
     loadProducts();
 });
 
-function updateCartBadge() {
-    const badge = document.querySelector('#cart-badge');
-    if (!badge) return;
-
-    try {
-        const cart = JSON.parse(localStorage.getItem('chocolifeCart')) || [];
-        const count = cart.reduce(
-            (sum, item) => sum + (Number(item.quantity) || 1),
-            0
-        );
-        badge.textContent = count;
-    } catch {
-        badge.textContent = '0';
-    }
-}
+// A click on a category card selects it in the filter and shows its offers
+document.querySelectorAll('.category-card').forEach(card => {
+    card.addEventListener('click', () => {
+        categoryFilter.value = card.dataset.categoryId;
+        currentPage = 1;
+        loadProducts();
+        document.querySelector('#offers').scrollIntoView({ behavior: 'smooth' });
+    });
+});
 
 loadCategories();
 loadProducts();
-updateCartBadge();

@@ -1,6 +1,11 @@
 <?php
 // Shared <head> and header for user pages.
 // The page sets: $user, $pageTitle, $activePage, $pageCss
+
+// Number of items in the cart for the header badge
+$stmt = getDb()->prepare('SELECT COALESCE(SUM(quantity), 0) FROM cart_items WHERE user_id = ?');
+$stmt->execute([$user['id']]);
+$cartCount = (int) $stmt->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -19,6 +24,7 @@
 
     <link rel="stylesheet" href="auth.css">
     <link rel="stylesheet" href="brand-theme.css">
+    <link rel="stylesheet" href="layout.css">
 </head>
 <body>
 
@@ -27,25 +33,30 @@
             <span class="brand-text">chocolife</span><span class="brand-heart">.me♥</span>
         </a>
 
-        <nav class="user-nav">
+        <nav class="user-nav" aria-label="Main navigation">
             <a href="user-home.php" class="<?= $activePage === 'home' ? 'active' : '' ?>">Home</a>
             <a href="user-home.php#offers">Offers</a>
             <a href="user-home.php#categories">Categories</a>
         </nav>
 
         <div class="user-actions">
-            <a href="cart.html" class="cart-link">
+<?php if ($user['role'] === 'admin'): ?>
+            <a href="admin.php" class="cart-link">
+                <span class="material-symbols-outlined">dashboard</span>
+                Admin panel
+            </a>
+<?php else: ?>
+            <a href="cart.php" class="cart-link <?= $activePage === 'cart' ? 'active' : '' ?>">
                 <span class="material-symbols-outlined">shopping_cart</span>
                 Cart
-                <span id="cart-badge">0</span>
+                <span id="cart-badge"><?= $cartCount ?></span>
             </a>
+<?php endif; ?>
 
-            <a href="profile.html" class="profile-nav-link <?= $activePage === 'profile' ? 'active' : '' ?>">
-                My Profile
+            <a href="profile.php" class="profile-nav-link <?= $activePage === 'profile' ? 'active' : '' ?>">
+                <span class="material-symbols-outlined">person</span>
+                <span id="user-name"><?= e($user['firstName'] . ' ' . $user['lastName']) ?></span>
             </a>
-
-            <span class="material-symbols-outlined">person</span>
-            <span id="user-name"><?= e($user['firstName'] . ' ' . $user['lastName']) ?></span>
 
             <button id="logout-button" type="button">Logout</button>
         </div>

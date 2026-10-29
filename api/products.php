@@ -1,6 +1,6 @@
 <?php
-// GET -> offers with search, category filter, sorting and pagination
-// Example: api/products.php?search=spa&category=1&sort=price_asc&page=2
+// GET -> offers with search, category and status filter, sorting and pagination
+// Example: api/products.php?search=spa&category=1&status=Available&sort=price_asc&page=2
 
 require __DIR__ . '/../includes/api.php';
 
@@ -11,6 +11,7 @@ const PER_PAGE = 8;
 $search     = is_string($_GET['search'] ?? null) ? trim($_GET['search']) : '';
 $categoryId = (int) ($_GET['category'] ?? 0);
 $sort       = is_string($_GET['sort'] ?? null) ? $_GET['sort'] : 'newest';
+$status     = is_string($_GET['status'] ?? null) ? $_GET['status'] : '';
 $page       = max(1, (int) ($_GET['page'] ?? 1));
 
 // Only these ORDER BY values are allowed, user input never goes into SQL directly
@@ -21,6 +22,8 @@ $sortOptions = [
     'discount'   => '(p.old_price - p.price) / p.old_price DESC',
     'rating'     => 'avg_rating DESC, review_count DESC',
     'popular'    => 'sold DESC',
+    'stock'      => 'p.stock ASC',
+    'name'       => 'p.name ASC',
 ];
 
 if (!isset($sortOptions[$sort])) {
@@ -44,6 +47,11 @@ if ($categoryId > 0) {
     $params[] = $categoryId;
 }
 
+if (in_array($status, ['Available', 'Unavailable'], true)) {
+    $where[]  = 'p.status = ?';
+    $params[] = $status;
+}
+
 $whereSql = implode(' AND ', $where);
 $db = getDb();
 
@@ -61,7 +69,7 @@ $offset     = ($page - 1) * PER_PAGE;
 // Subqueries with GROUP BY count the average rating and the number of sold coupons
 $stmt = $db->prepare("
     SELECT p.id, p.product_number, p.name, p.description, p.price, p.old_price,
-           p.status, p.image, p.valid_until,
+           p.stock, p.status, p.image, p.valid_until,
            c.name AS category,
            pr.name AS partner,
            COALESCE(r.avg_rating, 0)   AS avg_rating,
@@ -95,6 +103,7 @@ $products = array_map(fn(array $row) => [
     'description'   => $row['description'],
     'price'         => (float) $row['price'],
     'oldPrice'      => $row['old_price'] === null ? null : (float) $row['old_price'],
+    'stock'         => (int) $row['stock'],
     'status'        => $row['status'],
     'image'         => $row['image'],
     'validUntil'    => $row['valid_until'],

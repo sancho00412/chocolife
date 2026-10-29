@@ -1,0 +1,285 @@
+/* Shared styles for user pages with the PHP header and footer.
+   Loaded last, so it can fix colors forced by brand-theme.css. */
+
+/* Text for screen readers only */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+:focus-visible {
+    outline: 3px solid #6268ed;
+    outline-offset: 2px;
+}
+
+/* Header */
+
+#logout-button {
+    color: #20243a !important;
+    background: #fff !important;
+    font: inherit;
+}
+
+.profile-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.cart-link.active {
+    box-shadow: 0 0 0 3px #ffd2dc;
+}
+
+/* Footer */
+
+.user-footer {
+    flex-wrap: wrap;
+}
+
+.footer-nav {
+    display: flex;
+    gap: 1.2rem;
+}
+
+.footer-nav a:hover {
+    color: #6268ed;
+}
+
+/* Status and error messages */
+
+.page-status {
+    padding: 12px 0;
+    color: #6b7280;
+}
+
+.page-status[hidden] {
+    display: none;
+}
+
+.page-status.error,
+.form-status.error,
+#checkout-message.error {
+    color: #e74c3c;
+}
+
+.form-status.success {
+    color: #16834a;
+}
+
+.page-status a {
+    color: #6268ed;
+    font-weight: 600;
+}
+
+/* Category cards are buttons: keep them white */
+
+button.category-card {
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    background: #fff !important;
+    color: #20243a !important;
+    border-color: #eceef5 !important;
+}
+
+/* Pagination buttons */
+
+.user-pagination button {
+    background: #fff !important;
+    border-color: #e0e3f0 !important;
+    color: #202744 !important;
+}
+
+.user-pagination button.active {
+    background: #6268ed !important;
+    border-color: #6268ed !important;
+    color: #fff !important;
+}
+
+/* Offer page */
+
+.offer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+#offer-quantity {
+    width: 80px;
+    padding: 11px;
+    border: 1px solid #e0e3f0;
+    border-radius: 10px;
+    font: inherit;
+}
+
+.favorite-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 11px 18px;
+    border: 1px solid #f5234b !important;
+    border-radius: 10px;
+    background: #fff !important;
+    color: #f5234b !important;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.favorite-button.active {
+    background: #fff0f3 !important;
+}
+
+.favorite-button.active .material-symbols-outlined {
+    font-variation-settings: 'FILL' 1;
+}
+
+.review-delete {
+    background: #fff !important;
+    color: #e74c3c !important;
+}
+
+/* Cart */
+
+.cart-item-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    color: #6268ed;
+}
+
+.cart-item-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.line-item-name {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.cart-item-warning {
+    margin-top: 8px;
+    color: #e74c3c;
+}
+
+.remove-item {
+    background: #fff0f0 !important;
+    color: #d93030 !important;
+}
+
+.button-link {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.button-link.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.empty-cart a {
+    color: #6268ed;
+    font-weight: 600;
+}
+
+/* Order success page: the header is already on top */
+
+.success-page {
+    min-height: auto;
+    padding: 50px 16px;
+}
+
+/* Profile */
+
+.profile-since {
+    margin-top: 4px;
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+.profile-side {
+    display: grid;
+    gap: 24px;
+}
+
+details.profile-order summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+details.profile-order summary::-webkit-details-marker {
+    display: none;
+}
+
+.profile-order-items {
+    margin: 12px 0 0 18px;
+    color: #4b5563;
+    line-height: 1.7;
+}
+
+.status-completed {
+    color: #16834a !important;
+    background: #e6f8ed !important;
+}
+
+.status-declined {
+    color: #d93030 !important;
+    background: #fff0f0 !important;
+}
+
+.profile-favorites {
+    list-style: none;
+}
+
+.profile-favorites li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 12px 0;
+    border-top: 1px solid #e5e8f1;
+}
+
+.profile-favorites a {
+    color: #6268ed;
+    font-weight: 600;
+}
+
+.profile-favorites span {
+    color: #687086;
+}
+
+/* Small screens */
+
+@media (max-width: 600px) {
+    .user-header {
+        padding: 1rem 16px;
+    }
+
+    .user-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .footer-nav {
+        justify-content: center;
+    }
+}

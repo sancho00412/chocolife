@@ -7,6 +7,15 @@
             <span class="brand-text">chocolife</span>
             <span class="brand-heart">.me</span>
         </a>
+
+        <nav class="footer-nav" aria-label="Footer navigation">
+            <a href="user-home.php#offers">Offers</a>
+<?php if ($user['role'] === 'user'): ?>
+            <a href="cart.php">Cart</a>
+<?php endif; ?>
+            <a href="profile.php">My Profile</a>
+        </nav>
+
         <p>© 2026 Chocolife. All rights reserved.</p>
     </footer>
 

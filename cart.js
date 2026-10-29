@@ -1,152 +1,158 @@
+// Cart page: the cart is stored in the database (cart_items)
 
 const cartItems = document.querySelector('#cart-items');
 const cartCount = document.querySelector('#cart-count');
 const cartTotal = document.querySelector('#cart-total');
+const cartStatus = document.querySelector('#cart-status');
 const checkoutButton = document.querySelector('#checkout-button');
 
-function getCart() {
-    try {
-        const cart = JSON.parse(localStorage.getItem('chocolifeCart'));
-        return Array.isArray(cart) ? cart : [];
-    } catch {
-        return [];
-    }
+function showCartError(message) {
+    cartStatus.hidden = false;
+    cartStatus.textContent = message;
+    cartStatus.classList.add('error');
 }
 
-function saveCart(cart) {
-    localStorage.setItem('chocolifeCart', JSON.stringify(cart));
-}
-
-function parsePrice(value) {
-    if (typeof value === 'number') {
-        return value;
-    }
-
-    // Supports prices like "100000 ₸" and "100,000 ₸"
-    const normalized = String(value ?? '')
-        .replace(/\s/g, '')
-        .replace(/₸/g, '')
-        .replace(/,/g, '');
-
-    const price = Number(normalized);
-
-    return Number.isFinite(price) && price >= 0 ? price : 0;
-}
-
-function formatPrice(price) {
-    return price.toLocaleString('en-US') + ' ₸';
-}
-
-function renderCart() {
-    const cart = getCart();
+function renderCart(cart) {
+    cartStatus.hidden = true;
+    cartStatus.classList.remove('error');
 
     cartItems.innerHTML = '';
+    cartCount.textContent = cart.count;
+    cartTotal.textContent = formatPrice(cart.total);
+    updateCartBadge(cart.count);
 
-    if (cart.length === 0) {
-        cartItems.innerHTML = `
-            <div class="empty-cart">
-                <h2>Your cart is empty</h2>
-                <p>Add some offers to get started.</p>
-                <a href="user-home.php">Browse offers</a>
-            </div>
+    // Checkout is possible only when the cart is not empty and everything is in stock
+    const canCheckout = cart.items.length > 0 && cart.items.every(item => item.available);
+    checkoutButton.classList.toggle('disabled', !canCheckout);
+    checkoutButton.setAttribute('aria-disabled', String(!canCheckout));
+
+    if (cart.items.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-cart';
+        empty.innerHTML = `
+            <h2>Your cart is empty</h2>
+            <p>Find something you like in our offers.</p>
+            <a href="user-home.php#offers">Browse offers</a>
         `;
-
-        cartCount.textContent = '0';
-        cartTotal.textContent = '0 ₸';
+        cartItems.appendChild(empty);
         return;
     }
 
-    let total = 0;
-    let count = 0;
+    cart.items.forEach(item => {
+        const row = document.createElement('article');
+        row.className = 'cart-item';
 
-    cart.forEach((item, index) => {
-        const price = parsePrice(item.price);
-        const quantity = Math.max(
-            1,
-            Math.min(99, Number(item.quantity) || 1)
-        );
-
-        total += price * quantity;
-        count += quantity;
-
-        const card = document.createElement('article');
-        card.className = 'cart-item';
+        const image = document.createElement('div');
+        image.className = 'cart-item-image cart-item-placeholder';
 
         if (item.image) {
-            const image = document.createElement('img');
-            image.className = 'cart-item-image';
-            image.src = item.image;
-            image.alt = item.productName || 'Product';
-            card.appendChild(image);
+            const img = document.createElement('img');
+            img.src = item.image;
+            img.alt = item.name;
+            image.appendChild(img);
+        } else {
+            image.innerHTML = '<span class="material-symbols-outlined">local_offer</span>';
         }
 
         const info = document.createElement('div');
         info.className = 'cart-item-info';
 
-        const name = document.createElement('h3');
-        name.textContent = item.productName || 'Product';
+        const name = document.createElement('a');
+        name.href = `offer.php?id=${item.productId}`;
+        name.className = 'line-item-name';
+        name.textContent = item.name;
 
-        const priceText = document.createElement('p');
-        priceText.className = 'cart-item-price';
-        priceText.textContent = formatPrice(price);
+        const price = document.createElement('p');
+        price.className = 'cart-item-price';
+        price.textContent = `${formatPrice(item.price)} × ${item.quantity} = ${formatPrice(item.subtotal)}`;
 
-        const quantityLabel = document.createElement('label');
-        quantityLabel.textContent = 'Quantity: ';
+        const label = document.createElement('label');
+        label.textContent = 'Quantity: ';
 
-        const quantityInput = document.createElement('input');
-        quantityInput.className = 'cart-quantity';
-        quantityInput.type = 'number';
-        quantityInput.min = '1';
-        quantityInput.max = '99';
-        quantityInput.value = quantity;
+        const quantity = document.createElement('input');
+        quantity.type = 'number';
+        quantity.className = 'cart-quantity';
+        quantity.min = 1;
+        quantity.max = Math.max(1, Math.min(99, item.stock));
+        quantity.value = item.quantity;
+        quantity.addEventListener('change', () => changeQuantity(item.productId, quantity));
+        label.appendChild(quantity);
 
-        quantityInput.addEventListener('change', () => {
-            const updatedCart = getCart();
+        info.append(name, price, label);
 
-            if (!updatedCart[index]) return;
+        if (!item.available) {
+            const warning = document.createElement('p');
+            warning.className = 'cart-item-warning';
+            warning.textContent = item.stock > 0
+                ? `Only ${item.stock} left. Please lower the quantity.`
+                : 'This offer is no longer available. Please remove it.';
+            info.appendChild(warning);
+        }
 
-            const newQuantity = Math.max(
-                1,
-                Math.min(99, Number(quantityInput.value) || 1)
-            );
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'remove-item';
+        remove.textContent = 'Remove';
+        remove.addEventListener('click', () => removeItem(item.productId, item.name));
 
-            updatedCart[index].quantity = newQuantity;
-            saveCart(updatedCart);
-            renderCart();
-        });
-
-        quantityLabel.appendChild(quantityInput);
-        info.append(name, priceText, quantityLabel);
-
-        const removeButton = document.createElement('button');
-        removeButton.className = 'remove-item';
-        removeButton.type = 'button';
-        removeButton.textContent = 'Remove';
-
-        removeButton.addEventListener('click', () => {
-            const updatedCart = getCart();
-            updatedCart.splice(index, 1);
-            saveCart(updatedCart);
-            renderCart();
-        });
-
-        card.append(info, removeButton);
-        cartItems.appendChild(card);
+        row.append(image, info, remove);
+        cartItems.appendChild(row);
     });
-
-    cartCount.textContent = String(count);
-    cartTotal.textContent = formatPrice(total);
 }
 
-if (checkoutButton) {
-    checkoutButton.addEventListener('click', () => {
-        if (getCart().length === 0) {
-            alert('Your cart is empty.');
+async function sendCartRequest(method, data) {
+    try {
+        const result = await requestJson('api/cart.php', method, data);
+
+        if (!result.success) {
+            alert(result.error);
+            loadCart();
             return;
         }
 
-        window.location.href = 'checkout.html';
-    });
+        renderCart(result);
+    } catch {
+        showCartError('Could not connect to the server. Please try again.');
+    }
 }
 
-renderCart();
+function changeQuantity(productId, input) {
+    const quantity = Number(input.value);
+    const max = Number(input.max);
+
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > max) {
+        alert(`Quantity must be from 1 to ${max}.`);
+        loadCart();
+        return;
+    }
+
+    sendCartRequest('PATCH', { productId, quantity });
+}
+
+function removeItem(productId, name) {
+    if (confirm(`Remove "${name}" from the cart?`)) {
+        sendCartRequest('DELETE', { productId });
+    }
+}
+
+checkoutButton.addEventListener('click', event => {
+    if (checkoutButton.classList.contains('disabled')) {
+        event.preventDefault();
+    }
+});
+
+async function loadCart() {
+    try {
+        const result = await requestJson('api/cart.php');
+
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+
+        renderCart(result);
+    } catch {
+        showCartError('Could not load your cart. Please try again later.');
+    }
+}
+
+loadCart();
