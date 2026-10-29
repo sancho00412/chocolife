@@ -1,36 +1,100 @@
-const products = loadProducts();
+// Catalog: offers are loaded from the server with search, filter, sorting and pagination
+
 const userProducts = document.querySelector('#user-products');
 const searchInput = document.querySelector('#user-product-search');
 const categoryFilter = document.querySelector('#user-category-filter');
+const sortSelect = document.querySelector('#user-sort');
 const noResults = document.querySelector('#user-no-results');
+const catalogStatus = document.querySelector('#catalog-status');
+const pagination = document.querySelector('#user-pagination');
 
-function renderProducts() {
-    const searchValue = searchInput.value.trim().toLowerCase();
-    const selectedCategory = categoryFilter.value;
+let currentPage = 1;
+let searchTimer = null;
+let lastRequestId = 0;
 
-    const filteredProducts = products.filter(product => {
-        const name = String(product.productName || '').toLowerCase();
-        const description = String(product.description || '').toLowerCase();
+function formatPrice(price) {
+    return price.toLocaleString('en-US') + ' ₸';
+}
 
-        const matchesSearch =
-            name.includes(searchValue) ||
-            description.includes(searchValue);
+async function loadCategories() {
+    try {
+        const response = await fetch('api/categories.php');
+        const result = await response.json();
 
-        const matchesCategory =
-            selectedCategory === 'All' ||
-            product.category === selectedCategory;
+        if (!result.success) {
+            return;
+        }
 
-        return matchesSearch && matchesCategory;
+        result.categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = `${category.name} (${category.productCount})`;
+            categoryFilter.appendChild(option);
+        });
+    } catch {
+        // The catalog still works with "All Categories" only
+    }
+}
+
+async function loadProducts() {
+    // Only the answer to the newest request is shown
+    const requestId = ++lastRequestId;
+
+    const params = new URLSearchParams({
+        search: searchInput.value.trim(),
+        category: categoryFilter.value,
+        sort: sortSelect.value,
+        page: currentPage
     });
 
+    catalogStatus.textContent = 'Loading offers...';
+    catalogStatus.classList.remove('error');
+    catalogStatus.hidden = false;
+    noResults.hidden = true;
+    userProducts.classList.add('loading');
+
+    try {
+        const response = await fetch(`api/products.php?${params}`);
+        const result = await response.json();
+
+        if (requestId !== lastRequestId) {
+            return;
+        }
+
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+
+        currentPage = result.page;
+        catalogStatus.hidden = true;
+        noResults.hidden = result.products.length > 0;
+
+        renderProducts(result.products);
+        renderPagination(result.page, result.totalPages);
+    } catch {
+        if (requestId !== lastRequestId) {
+            return;
+        }
+
+        catalogStatus.textContent = 'Could not load offers. Please try again later.';
+        catalogStatus.classList.add('error');
+        userProducts.innerHTML = '';
+        pagination.innerHTML = '';
+    } finally {
+        if (requestId === lastRequestId) {
+            userProducts.classList.remove('loading');
+        }
+    }
+}
+
+function renderProducts(products) {
     userProducts.innerHTML = '';
 
-    noResults.hidden = filteredProducts.length > 0;
-
-    filteredProducts.forEach(product => {
+    products.forEach(product => {
         const card = document.createElement('article');
         card.className = 'user-product-card';
         card.style.cursor = 'pointer';
+        card.tabIndex = 0;
 
         const image = document.createElement('div');
 
@@ -38,7 +102,7 @@ function renderProducts() {
             const img = document.createElement('img');
             img.className = 'user-product-image';
             img.src = product.image;
-            img.alt = product.productName || 'Offer';
+            img.alt = product.name;
             image.appendChild(img);
         } else {
             image.className =
@@ -54,40 +118,121 @@ function renderProducts() {
         info.className = 'user-product-info';
 
         const name = document.createElement('h3');
-        name.textContent = product.productName || 'Unnamed offer';
+        name.textContent = product.name;
 
         const description = document.createElement('p');
-        description.textContent =
-            product.description || product.category || 'Discover this offer';
+        description.textContent = product.description || product.category;
 
         const price = document.createElement('span');
         price.className = 'user-product-price';
-        price.textContent = product.price ?? 'Price unavailable';
+        price.textContent = formatPrice(product.price);
+
+        if (product.oldPrice) {
+            const oldPrice = document.createElement('span');
+            oldPrice.className = 'user-product-old-price';
+            oldPrice.textContent = formatPrice(product.oldPrice);
+            price.appendChild(oldPrice);
+        }
+
+        info.append(name, description, price);
+
+        if (product.reviewCount > 0) {
+            const rating = document.createElement('span');
+            rating.className = 'user-product-rating';
+            rating.textContent = `★ ${product.rating} (${product.reviewCount})`;
+            info.appendChild(rating);
+        }
 
         const status = document.createElement('span');
         status.className = 'user-product-status';
-        status.textContent = product.status || 'Unknown';
+        status.textContent = product.status;
 
         if (product.status !== 'Available') {
             status.classList.add('unavailable');
         }
 
-        info.append(name, description, price, status);
+        info.appendChild(status);
         card.append(image, info);
 
-        card.addEventListener('click', () => {
-            localStorage.setItem('selectedProduct', JSON.stringify(product));
+        const openProduct = () => {
+            // Temporary: product-details still reads the product from localStorage
+            localStorage.setItem('selectedProduct', JSON.stringify({
+                productNumber: product.productNumber,
+                productName: product.name,
+                price: formatPrice(product.price),
+                category: product.category,
+                status: product.status,
+                description: product.description,
+                image: product.image || ''
+            }));
             window.location.href = 'product-details.html';
+        };
+
+        card.addEventListener('click', openProduct);
+        card.addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+                openProduct();
+            }
         });
 
         userProducts.appendChild(card);
     });
 }
 
-searchInput.addEventListener('input', renderProducts);
-categoryFilter.addEventListener('change', renderProducts);
+function renderPagination(page, totalPages) {
+    pagination.innerHTML = '';
 
-renderProducts();
+    if (totalPages <= 1) {
+        return;
+    }
+
+    const addButton = (label, targetPage, disabled = false, active = false) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = label;
+        button.disabled = disabled;
+
+        if (active) {
+            button.classList.add('active');
+            button.setAttribute('aria-current', 'page');
+        }
+
+        button.addEventListener('click', () => {
+            currentPage = targetPage;
+            loadProducts();
+            document.querySelector('#offers').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        pagination.appendChild(button);
+    };
+
+    addButton('‹ Prev', page - 1, page === 1);
+
+    for (let i = 1; i <= totalPages; i++) {
+        addButton(String(i), i, false, i === page);
+    }
+
+    addButton('Next ›', page + 1, page === totalPages);
+}
+
+// Search waits 300 ms after the last key press, so we don't send a request for every letter
+searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+        currentPage = 1;
+        loadProducts();
+    }, 300);
+});
+
+categoryFilter.addEventListener('change', () => {
+    currentPage = 1;
+    loadProducts();
+});
+
+sortSelect.addEventListener('change', () => {
+    currentPage = 1;
+    loadProducts();
+});
 
 function updateCartBadge() {
     const badge = document.querySelector('#cart-badge');
@@ -105,4 +250,6 @@ function updateCartBadge() {
     }
 }
 
+loadCategories();
+loadProducts();
 updateCartBadge();

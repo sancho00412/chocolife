@@ -6,7 +6,7 @@ $user = requirePageLogin();
 $pageTitle   = 'Home';
 $activePage  = 'home';
 $pageCss     = ['user-home.css'];
-$pageScripts = ['products-data.js', 'user-home.js'];
+$pageScripts = ['user-home.js'];
 
 require __DIR__ . '/includes/header.php';
 ?>
@@ -55,23 +55,25 @@ require __DIR__ . '/includes/header.php';
                         type="search"
                         id="user-product-search"
                         placeholder="Search offers..."
+                        aria-label="Search offers"
                         autocomplete="off"
                     >
                 </div>
 
-                <select id="user-category-filter">
-                    <option value="All">All Categories</option>
-                    <option value="Beauty">Beauty</option>
-                    <option value="Food">Food</option>
-                    <option value="Entertainment">Entertainment</option>
-                    <option value="Travel">Travel</option>
-                    <option value="Fitness">Fitness</option>
+                <select id="user-category-filter" aria-label="Filter by category">
+                    <option value="">All Categories</option>
+                </select>
+
+                <select id="user-sort" aria-label="Sort offers">
+                    <option value="newest">Newest first</option>
+                    <option value="price_asc">Price: low to high</option>
+                    <option value="price_desc">Price: high to low</option>
+                    <option value="discount">Biggest discount</option>
+                    <option value="rating">Best rated</option>
+                    <option value="popular">Most popular</option>
                 </select>
             </div>
 
-            <p id="user-no-results" class="user-no-results" hidden>
-                No offers found. Try another search or category.
-            </p>
 
             <div class="category-grid">
 
@@ -110,7 +112,15 @@ require __DIR__ . '/includes/header.php';
                 </div>
             </div>
 
+            <p id="catalog-status" class="catalog-status" role="status" hidden></p>
+
+            <p id="user-no-results" class="user-no-results" hidden>
+                No offers found. Try another search or category.
+            </p>
+
             <div id="user-products" class="user-product-grid"></div>
+
+            <nav id="user-pagination" class="user-pagination" aria-label="Offers pages"></nav>
         </section>
 
     </main>
