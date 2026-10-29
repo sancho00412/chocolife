@@ -1,7 +1,18 @@
+// Sends JSON to an API file and returns the parsed answer
+async function postJson(url, data) {
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+
+    return response.json();
+}
+
 const loginForm = document.querySelector('#login-form');
 
 if (loginForm) {
-    loginForm.addEventListener('submit', (event) => {
+    loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const email = document.querySelector('#login-email')
@@ -13,48 +24,37 @@ if (loginForm) {
         message.style.color = '#e74c3c';
         message.textContent = '';
 
-        if (
-            email === 'admin@chocolife.kz' &&
-            password === 'Admin123!'
-        ) {
-            localStorage.setItem('chocolifeUserRole', 'admin');
-            window.location.href = 'index.html';
-            return;
+        try {
+            const result = await postJson('api/login.php', { email, password });
+
+            if (!result.success) {
+                message.textContent = result.error;
+                return;
+            }
+
+            const user = result.user;
+
+            // Temporary: other pages still read these keys.
+            // They will be removed when those pages move to the API.
+            localStorage.setItem('chocolifeUserRole', user.role);
+            localStorage.setItem('chocolifeCurrentUser', JSON.stringify({
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email
+            }));
+
+            window.location.href =
+                user.role === 'admin' ? 'index.html' : 'user-home.html';
+        } catch (error) {
+            message.textContent = 'Could not connect to the server.';
         }
-
-        const users =
-            JSON.parse(localStorage.getItem('chocolifeUsers')) || [];
-
-        const user = users.find(user =>
-            String(user.email || '').trim().toLowerCase() === email &&
-            user.password === password
-        );
-
-        if (!user) {
-            message.textContent = 'Incorrect email or password.';
-            return;
-        }
-
-        localStorage.setItem('chocolifeUserRole', 'user');
-
-        const currentUser = {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email
-        };
-
-        localStorage.setItem(
-            'chocolifeCurrentUser',
-            JSON.stringify(currentUser)
-        );
-
-        window.location.href = 'user-home.html';
     });
 }
+
 const registerForm = document.querySelector('#register-form');
 
 if (registerForm) {
-    registerForm.addEventListener('submit', (event) => {
+    registerForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const firstName = document.querySelector('#first-name').value.trim();
@@ -72,43 +72,27 @@ if (registerForm) {
             return;
         }
 
-        let users = [];
-
         try {
-            const savedUsers = JSON.parse(
-                localStorage.getItem('chocolifeUsers') || '[]'
-            );
-            users = Array.isArray(savedUsers) ? savedUsers : [];
+            const result = await postJson('api/register.php', {
+                firstName,
+                lastName,
+                email,
+                password
+            });
+
+            if (!result.success) {
+                message.textContent = result.error;
+                return;
+            }
+
+            message.style.color = '#16a34a';
+            message.textContent = 'Account created successfully! Redirecting...';
+
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1000);
         } catch (error) {
-            message.textContent = 'Could not read saved users.';
-            return;
+            message.textContent = 'Could not connect to the server.';
         }
-
-        const existingUser = users.some(
-            user => String(user.email || '').trim().toLowerCase() === email
-        );
-
-        if (existingUser) {
-            message.textContent = 'This email is already registered.';
-            return;
-        }
-
-        const newUser = {
-            firstName,
-            lastName,
-            email,
-            password
-        };
-
-        users.push(newUser);
-
-        localStorage.setItem('chocolifeUsers', JSON.stringify(users));
-
-        message.style.color = '#16a34a';
-        message.textContent = 'Account created successfully! Redirecting...';
-
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 1000);
     });
 }
