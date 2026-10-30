@@ -81,6 +81,14 @@ require __DIR__ . '/includes/admin-header.php';
                 <input type="number" id="stock" name="stock" min="0" step="1" required value="<?= $value('stock', '100') ?>">
                 <small class="field-error" id="stock-error"></small>
             </div>
+
+            <div class="form-group">
+                <label for="maxPerCustomer">Limit per customer *</label>
+                <input type="number" id="maxPerCustomer" name="maxPerCustomer" min="1" max="10" step="1" required
+                    value="<?= $value('max_per_customer', '1') ?>">
+                <small class="text-muted">2 for things people do together (cinema), 1 for personal ones (salon, gym)</small>
+                <small class="field-error" id="maxPerCustomer-error"></small>
+            </div>
         </div>
 
         <div class="form-row">
@@ -113,9 +121,15 @@ require __DIR__ . '/includes/admin-header.php';
 
         <div class="form-row">
             <div class="form-group">
-                <label for="validUntil">Valid until</label>
+                <label for="validUntil">Can be bought until</label>
                 <input type="date" id="validUntil" name="validUntil" value="<?= $value('valid_until') ?>">
                 <small class="field-error" id="validUntil-error"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="useUntil">Use until</label>
+                <input type="date" id="useUntil" name="useUntil" value="<?= $value('use_until') ?>">
+                <small class="field-error" id="useUntil-error"></small>
             </div>
 
             <div class="form-group">

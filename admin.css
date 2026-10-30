@@ -557,6 +557,8 @@ textarea {
 
 .pagination {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: center;
     gap: 8px;
     margin-top: 16px;
@@ -702,4 +704,67 @@ textarea {
     .bar-value {
         grid-column: 2;
     }
+}
+
+/* Messages */
+
+.messages-list {
+    display: grid;
+    gap: 14px;
+}
+
+.message-card {
+    padding: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+}
+
+.message-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.message-text {
+    margin: 10px 0 12px;
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+.badge-new {
+    background: #fff4dc;
+    color: var(--color-warning);
+}
+
+.badge-answered {
+    background: #e6f8ed;
+    color: var(--color-success);
+}
+
+.nav-badge {
+    margin-left: auto;
+    min-width: 22px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: #f5234b;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.alert-new {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff4dc;
+    color: #8a5a00;
+    font-weight: 600;
+}
+
+.alert-new:hover {
+    text-decoration: none;
+    background: #ffecbf;
 }

@@ -40,16 +40,18 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $price       = postField('price');
         $oldPrice    = postField('oldPrice');
         $stock       = postField('stock');
+        $maxPerCustomer = postField('maxPerCustomer');
         $categoryId  = (int) ($_POST['categoryId'] ?? 0);
         $partnerId   = (int) ($_POST['partnerId'] ?? 0);
         $validUntil  = postField('validUntil');
+        $useUntil    = postField('useUntil');
         $status      = postField('status');
         $removeImage = postField('removeImage') === '1';
 
         $existing = null;
 
         if ($id > 0) {
-            $stmt = $db->prepare('SELECT id, image FROM products WHERE id = ?');
+            $stmt = $db->prepare('SELECT id, image, image_credit, image_source FROM products WHERE id = ?');
             $stmt->execute([$id]);
             $existing = $stmt->fetch();
 
@@ -92,6 +94,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
             $errors['stock'] = 'Stock must be a whole number from 0 to 100,000.';
         }
 
+        if (!preg_match('/^([1-9]|10)$/', $maxPerCustomer)) {
+            $errors['maxPerCustomer'] = 'Limit must be a whole number from 1 to 10.';
+        }
+
         $stmt = $db->prepare('SELECT id FROM categories WHERE id = ?');
         $stmt->execute([$categoryId]);
         if (!$stmt->fetch()) {
@@ -106,11 +112,18 @@ switch ($_SERVER['REQUEST_METHOD']) {
             }
         }
 
-        if ($validUntil !== '') {
-            $date = DateTime::createFromFormat('Y-m-d', $validUntil);
-            if (!$date || $date->format('Y-m-d') !== $validUntil) {
-                $errors['validUntil'] = 'Enter a valid date.';
+        foreach (['validUntil' => $validUntil, 'useUntil' => $useUntil] as $field => $date) {
+            if ($date !== '') {
+                $parsed = DateTime::createFromFormat('Y-m-d', $date);
+                if (!$parsed || $parsed->format('Y-m-d') !== $date) {
+                    $errors[$field] = 'Enter a valid date.';
+                }
             }
+        }
+
+        if (!isset($errors['validUntil']) && !isset($errors['useUntil'])
+            && $validUntil !== '' && $useUntil !== '' && $useUntil < $validUntil) {
+            $errors['useUntil'] = 'The coupon cannot expire before the sale ends.';
         }
 
         if (!in_array($status, ['Available', 'Unavailable'], true)) {
@@ -140,7 +153,9 @@ switch ($_SERVER['REQUEST_METHOD']) {
             sendJson(['success' => false, 'error' => 'Please fix the errors in the form.', 'fields' => $errors], 400);
         }
 
-        $image = $existing['image'] ?? null;
+        $image       = $existing['image'] ?? null;
+        $imageCredit = $existing['image_credit'] ?? null;
+        $imageSource = $existing['image_source'] ?? null;
 
         if ($newImageExtension !== null) {
             if (!is_dir(IMAGE_DIR)) {
@@ -156,9 +171,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
             deleteImage($image);
             $image = IMAGE_URL . $fileName;
+            // The admin's own photo: the old author credit does not belong to it
+            $imageCredit = $imageSource = null;
         } elseif ($removeImage) {
             deleteImage($image);
-            $image = null;
+            $image = $imageCredit = $imageSource = null;
         }
 
         $values = [
@@ -168,9 +185,13 @@ switch ($_SERVER['REQUEST_METHOD']) {
             $price,
             $oldPrice === '' ? null : $oldPrice,
             (int) $stock,
+            (int) $maxPerCustomer,
             $status,
             $image,
+            $imageCredit,
+            $imageSource,
             $validUntil === '' ? null : $validUntil,
+            $useUntil === '' ? null : $useUntil,
             $categoryId,
             $partnerId > 0 ? $partnerId : null,
         ];
@@ -179,15 +200,18 @@ switch ($_SERVER['REQUEST_METHOD']) {
             $stmt = $db->prepare('
                 UPDATE products
                 SET product_number = ?, name = ?, description = ?, price = ?, old_price = ?,
-                    stock = ?, status = ?, image = ?, valid_until = ?, category_id = ?, partner_id = ?
+                    stock = ?, max_per_customer = ?, status = ?,
+                    image = ?, image_credit = ?, image_source = ?,
+                    valid_until = ?, use_until = ?, category_id = ?, partner_id = ?
                 WHERE id = ?
             ');
             $stmt->execute([...$values, $id]);
         } else {
             $stmt = $db->prepare('
                 INSERT INTO products (product_number, name, description, price, old_price,
-                                      stock, status, image, valid_until, category_id, partner_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                      stock, max_per_customer, status, image, image_credit, image_source,
+                                      valid_until, use_until, category_id, partner_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ');
             $stmt->execute($values);
             $id = (int) $db->lastInsertId();

@@ -1,6 +1,6 @@
 <?php
 // Admin only.
-// GET   ?search=&status=&from=&to=&sort=   -> orders with their items
+// GET   ?search=&status=&from=&to=&sort=&page=   -> one page of orders with their items
 // PATCH {orderId, status}                   -> change the order status
 
 require __DIR__ . '/../includes/api.php';
@@ -9,6 +9,7 @@ requireAdmin();
 $db = getDb();
 
 const STATUSES = ['Pending', 'Completed', 'Declined'];
+const ORDERS_PER_PAGE = 20;
 
 function validDate(string $date): bool
 {
@@ -23,6 +24,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $from   = is_string($_GET['from'] ?? null) ? $_GET['from'] : '';
         $to     = is_string($_GET['to'] ?? null) ? $_GET['to'] : '';
         $sort   = is_string($_GET['sort'] ?? null) ? $_GET['sort'] : 'newest';
+        $page   = max(1, (int) ($_GET['page'] ?? 1));
 
         $sortOptions = [
             'newest'     => 'o.created_at DESC',
@@ -66,6 +68,15 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
         $whereSql = implode(' AND ', $where);
 
+        // Number and sum of all matching orders, needed for the summary and pagination
+        $stmt = $db->prepare("SELECT COUNT(*) AS count, COALESCE(SUM(o.total), 0) AS sum FROM orders o WHERE $whereSql");
+        $stmt->execute($params);
+        $totals = $stmt->fetch();
+
+        $totalPages = max(1, (int) ceil($totals['count'] / ORDERS_PER_PAGE));
+        $page       = min($page, $totalPages);
+        $offset     = ($page - 1) * ORDERS_PER_PAGE;
+
         $stmt = $db->prepare("
             SELECT o.id, o.order_number, o.customer_name, o.email, o.phone, o.address,
                    o.total, o.status, o.created_at,
@@ -74,7 +85,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
             JOIN order_items oi ON oi.order_id = o.id
             WHERE $whereSql
             GROUP BY o.id
-            ORDER BY {$sortOptions[$sort]}
+            ORDER BY {$sortOptions[$sort]}, o.id DESC
+            LIMIT " . ORDERS_PER_PAGE . " OFFSET $offset
         ");
         $stmt->execute($params);
         $orders = $stmt->fetchAll();
@@ -117,8 +129,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 'itemCount'    => (int) $order['items'],
                 'items'        => $itemsByOrder[$order['id']] ?? [],
             ], $orders),
-            'count' => count($orders),
-            'sum'   => array_sum(array_column($orders, 'total')),
+            'count'      => (int) $totals['count'],
+            'sum'        => (float) $totals['sum'],
+            'page'       => $page,
+            'totalPages' => $totalPages,
         ]);
 
     case 'PATCH':

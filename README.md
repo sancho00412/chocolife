@@ -37,15 +37,19 @@ Six more customers (`madina@`, `timur@`, `aigerim@`, `nursultan@`, `dana@mail.kz
 | `register.html`, `login.html` | guests | registration and login |
 | `user-home.php` | logged in | catalog: search, category filter, sorting, pagination (AJAX) |
 | `offer.php?id=` | logged in | offer details, add to cart, save to favorites, reviews |
+| `favorites.php` | customers | saved offers (heart in the header), remove without reload |
 | `cart.php` | customers | cart stored in the database, change quantity, remove |
 | `checkout.php` | customers | order form with validation, places the order in a transaction |
 | `order-success.php?id=` | customers | confirmation, only for the owner of the order |
+| `faq.php`, `feedback.php`, `business.php` | logged in | "Help" menu in the header: FAQ, feedback form, partner request form |
+| `about.php` | logged in | about the service: live numbers from the database, how it works, categories, contacts |
 | `profile.php` | logged in | edit name and phone, change password, order history, saved offers |
 | `admin.php` | admins | dashboard: revenue, orders, customers, offers that need attention |
 | `admin-orders.php` | admins | all orders: search, status and date filters, sorting, status change |
 | `admin-products.php` | admins | offers: search, filters, sorting, pagination, delete |
 | `admin-product-form.php` | admins | create and edit offers with image upload |
 | `admin-users.php` | admins | users with their order statistics, delete customers |
+| `admin-messages.php` | admins | feedback and partner requests, mark as answered |
 | `admin-reports.php` | admins | 10 SQL reports for a chosen period |
 
 `index.php` sends visitors to the right start page for their role.
@@ -67,7 +71,7 @@ tests/        automatic API tests
 
 ## Database
 
-9 related tables: `users`, `categories`, `partners`, `products`, `cart_items`, `orders`, `order_items`, `reviews`, `favorites`.
+10 related tables: `users`, `categories`, `partners`, `products`, `cart_items`, `orders`, `order_items`, `reviews`, `favorites`, `messages`.
 
 - Primary keys, foreign keys with `ON DELETE CASCADE / SET NULL / RESTRICT`.
 - `CHECK` constraints: price ≥ 0, old price ≥ price, stock ≥ 0, quantity 1–99, rating 1–5.
@@ -94,6 +98,12 @@ tests/        automatic API tests
 | 14 | Order statuses in period | `admin-reports.php` | COUNT, SUM, GROUP BY |
 
 The reports page shows the SQL text under every report ("Show SQL").
+
+### Business rules
+
+- **Stock:** an offer cannot be bought when no coupons are left; the catalog shows "Sold out".
+- **Limit per customer** (`products.max_per_customer`, set by the admin, 1–10): 2 for things people do together (cinema, dinner, bowling), 1 for personal ones (salon, gym, hotel). Coupons from earlier orders count too, so the limit cannot be bypassed with several orders. Checked in the cart (`api/cart.php`) and again inside the checkout transaction (`api/orders.php`); shared logic is in `includes/shop.php`.
+- **Reviews:** only customers who bought the offer, one review per offer.
 
 ### Transactions
 
@@ -122,13 +132,17 @@ The reports page shows the SQL text under every report ("Show SQL").
 
 ## Tests
 
-See [TESTING.md](TESTING.md). Automatic API tests (47 checks):
+See [TESTING.md](TESTING.md). Automatic API tests (57 checks):
 
 ```
 C:\xampp\php\php.exe database\seed.php
 C:\xampp\php\php.exe tests\api-tests.php
 C:\xampp\php\php.exe database\seed.php
 ```
+
+## Photos
+
+The 50 offer photos in `images/offers/` are free-licensed images from [Wikimedia Commons](https://commons.wikimedia.org) (CC0, Public Domain, CC BY, CC BY-SA). The author and license of each photo are stored in `database/photo-credits.php`, saved in `products.image_credit` / `products.image_source` and shown under the photo on the offer page, as the licenses require. Photos uploaded by the admin go to `images/products/` and have no credit line.
 
 ## Deployment
 

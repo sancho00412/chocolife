@@ -20,6 +20,12 @@ if (offer) {
     const reviewsStatus = document.querySelector('#reviews-status');
     const reviewsList = document.querySelector('#reviews-list');
     const reviewsSummary = document.querySelector('#reviews-summary');
+    const reviewsMore = document.querySelector('#reviews-more');
+
+    // Reviews are shown 10 at a time
+    const REVIEWS_PAGE = 10;
+    let allReviews = [];
+    let shownReviews = 0;
 
     function showMessage(element, text, isError) {
         element.textContent = text;
@@ -72,6 +78,7 @@ if (offer) {
             favoriteButton.setAttribute('aria-pressed', String(result.isFavorite));
             favoriteButton.querySelector('.favorite-label').textContent =
                 result.isFavorite ? 'Saved' : 'Save';
+            updateFavoritesBadge(result.count);
         } catch {
             showMessage(cartMessage, 'Could not connect to the server.', true);
         }
@@ -101,6 +108,10 @@ if (offer) {
             ? `★ ${result.average} · ${result.count}`
             : '';
 
+        // The numbers under the "Add to Cart" button
+        document.querySelector('#stat-rating').textContent = result.count > 0 ? result.average : '—';
+        document.querySelector('#stat-reviews').textContent = result.count;
+
         reviewForm.hidden = !result.canReview;
         reviewHint.hidden = result.canReview || result.isAdmin;
 
@@ -118,7 +129,20 @@ if (offer) {
         reviewsStatus.hidden = result.count > 0;
         showMessage(reviewsStatus, 'No reviews yet.', false);
 
-        result.reviews.forEach(review => {
+        allReviews = result.reviews;
+        shownReviews = 0;
+        showMoreReviews();
+    }
+
+    function showMoreReviews() {
+        const next = allReviews.slice(shownReviews, shownReviews + REVIEWS_PAGE);
+        shownReviews += next.length;
+
+        const left = allReviews.length - shownReviews;
+        reviewsMore.hidden = left === 0;
+        reviewsMore.textContent = `Show more reviews (${left})`;
+
+        next.forEach(review => {
             const item = document.createElement('article');
             item.className = 'review-item';
 
@@ -158,6 +182,8 @@ if (offer) {
             reviewsList.appendChild(item);
         });
     }
+
+    reviewsMore.addEventListener('click', showMoreReviews);
 
     reviewForm.addEventListener('submit', async event => {
         event.preventDefault();
@@ -212,4 +238,23 @@ if (offer) {
     }
 
     loadReviews();
+
+    // 2GIS map with a marker at the partner (only when the page has a map block)
+    const mapElement = document.querySelector('#partner-map');
+
+    if (mapElement) {
+        if (window.mapgl) {
+            const coordinates = [Number(mapElement.dataset.lng), Number(mapElement.dataset.lat)];
+
+            const map = new mapgl.Map('partner-map', {
+                key: mapElement.dataset.key,
+                center: coordinates,
+                zoom: 15
+            });
+
+            new mapgl.Marker(map, { coordinates });
+        } else {
+            mapElement.textContent = 'The map could not be loaded. Use the "Open in 2GIS" link above.';
+        }
+    }
 }

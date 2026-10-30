@@ -73,19 +73,22 @@ function renderCart(cart) {
         quantity.type = 'number';
         quantity.className = 'cart-quantity';
         quantity.min = 1;
-        quantity.max = Math.max(1, Math.min(99, item.stock));
+        quantity.max = Math.max(1, item.maxQuantity);
         quantity.value = item.quantity;
         quantity.addEventListener('change', () => changeQuantity(item.productId, quantity));
         label.appendChild(quantity);
 
         info.append(name, price, label);
 
+        const limit = document.createElement('p');
+        limit.className = 'cart-item-limit';
+        limit.textContent = `Limit: ${item.maxPerCustomer} per customer`;
+        info.appendChild(limit);
+
         if (!item.available) {
             const warning = document.createElement('p');
             warning.className = 'cart-item-warning';
-            warning.textContent = item.stock > 0
-                ? `Only ${item.stock} left. Please lower the quantity.`
-                : 'This offer is no longer available. Please remove it.';
+            warning.textContent = item.problem;
             info.appendChild(warning);
         }
 

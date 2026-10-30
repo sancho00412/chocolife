@@ -137,8 +137,8 @@ check('XSS: a name with <script> is shown as text in the header',
 
 // ---------- Catalog ----------
 
-[$status, $result] = $guest->request('GET', 'api/products.php?search=spa');
-check('Search "spa" finds exactly 1 offer', $status === 200 && $result['total'] === 1, 'got ' . ($result['total'] ?? $status));
+[$status, $result] = $guest->request('GET', 'api/products.php?search=bowling');
+check('Search "bowling" finds exactly 1 offer', $status === 200 && $result['total'] === 1, 'got ' . ($result['total'] ?? $status));
 
 [$status, $result] = $guest->request('GET', 'api/products.php?search=' . urlencode("' OR 1=1 -- "));
 check('SQL injection in the search returns 0 offers, not all of them', $status === 200 && $result['total'] === 0);
@@ -157,22 +157,35 @@ check('Page 999 returns the last page instead of an error', $status === 200 && $
 
 // ---------- Cart and checkout ----------
 
-$hotel = productByName($guest, 'Hotel Weekend');
-$ski   = productByName($guest, 'Ski Day Pass');
+$hotel  = productByName($guest, 'Hotel Weekend');
+$ski    = productByName($guest, 'Ski Day Pass');
+$cinema = productByName($guest, 'Cinema Tickets for Two');
 
-[$status] = $customer->request('POST', 'api/cart.php', ['productId' => $hotel['id'], 'quantity' => 0]);
+[$status] = $customer->request('POST', 'api/cart.php', ['productId' => $cinema['id'], 'quantity' => 0]);
 check('Adding quantity 0 to the cart is rejected (400)', $status === 400, "got $status");
 
 [$status] = $customer->request('POST', 'api/cart.php', ['productId' => $ski['id'], 'quantity' => 1]);
 check('An unavailable offer cannot be added to the cart (409)', $status === 409, "got $status");
 
-[$status] = $customer->request('POST', 'api/cart.php', ['productId' => $hotel['id'], 'quantity' => $hotel['stock'] + 1]);
-check('Cannot add more coupons than in stock (409)', $status === 409, "got $status");
+$quest = productByName($guest, 'Quest Room');
+[$status, $result] = $customer->request('POST', 'api/cart.php', ['productId' => $quest['id'], 'quantity' => $quest['stock'] + 1]);
+check('Cannot add more coupons than in stock (409)',
+    $status === 409 && str_contains($result['error'] ?? '', 'left'), "got $status");
 
 [$status, $result] = $customer->request('POST', 'api/cart.php', ['productId' => $hotel['id'], 'quantity' => 2]);
-check('Adding 2 coupons to the cart works', $status === 200 && $result['count'] === 2, "got $status");
+check('Limit 1 per customer: 2 hotel coupons are rejected (409)',
+    $status === 409 && str_contains($result['error'] ?? '', 'limited to 1'), "got $status");
 
-[$status] = $customer->request('PUT', 'api/cart.php', ['productId' => $hotel['id']]);
+[$status] = $customer->request('POST', 'api/cart.php', ['productId' => $cinema['id'], 'quantity' => 3]);
+check('Limit 2 per customer: 3 cinema coupons are rejected (boundary, 409)', $status === 409, "got $status");
+
+[$status, $result] = $customer->request('POST', 'api/cart.php', ['productId' => $cinema['id'], 'quantity' => 2]);
+check('Limit 2 per customer: 2 cinema coupons are added (boundary)', $status === 200 && $result['count'] === 2, "got $status");
+
+[$status] = $customer->request('POST', 'api/cart.php', ['productId' => $cinema['id'], 'quantity' => 1]);
+check('A third cinema coupon cannot be added later (409)', $status === 409, "got $status");
+
+[$status] = $customer->request('PUT', 'api/cart.php', ['productId' => $cinema['id']]);
 check('Unsupported HTTP method is rejected (405)', $status === 405, "got $status");
 
 [$status, $result] = $customer->request('POST', 'api/orders.php',
@@ -184,12 +197,16 @@ check('Checkout with an invalid phone returns a field error (400)', $status === 
 $orderId = $result['orderId'] ?? 0;
 check('Checkout with valid data creates an order (201)', $status === 201 && $orderId > 0, "got $status");
 
-$hotelAfter = productByName($guest, 'Hotel Weekend');
-check('Transaction: the stock went down by 2', $hotelAfter['stock'] === $hotel['stock'] - 2,
-    "stock {$hotel['stock']} -> {$hotelAfter['stock']}");
+$cinemaAfter = productByName($guest, 'Cinema Tickets for Two');
+check('Transaction: the stock went down by 2', $cinemaAfter['stock'] === $cinema['stock'] - 2,
+    "stock {$cinema['stock']} -> {$cinemaAfter['stock']}");
 
 [, $result] = $customer->request('GET', 'api/cart.php');
 check('Transaction: the cart is empty after checkout', $result['count'] === 0);
+
+[$status, $result] = $customer->request('POST', 'api/cart.php', ['productId' => $cinema['id'], 'quantity' => 1]);
+check('Earlier orders count: after buying 2 cinema coupons, no more can be added (409)',
+    $status === 409 && str_contains($result['error'] ?? '', 'already bought'), "got $status");
 
 [$status] = $customer->request('POST', 'api/orders.php',
     ['customerName' => 'Test User', 'email' => $email, 'phone' => '+7 701 000 0000', 'address' => 'Almaty, Abay 1']);
@@ -202,10 +219,10 @@ $yoga = productByName($guest, 'Yoga Course');
 [$status] = $customer->request('POST', 'api/reviews.php', ['productId' => $yoga['id'], 'rating' => 5]);
 check('Review of an offer that was not bought is rejected (403)', $status === 403, "got $status");
 
-[$status] = $customer->request('POST', 'api/reviews.php', ['productId' => $hotel['id'], 'rating' => 6]);
+[$status] = $customer->request('POST', 'api/reviews.php', ['productId' => $cinema['id'], 'rating' => 6]);
 check('Rating 6 is rejected (boundary, 400)', $status === 400, "got $status");
 
-[$status] = $customer->request('POST', 'api/reviews.php', ['productId' => $hotel['id'], 'rating' => 5, 'comment' => 'Great!']);
+[$status] = $customer->request('POST', 'api/reviews.php', ['productId' => $cinema['id'], 'rating' => 5, 'comment' => 'Great!']);
 check('Review of a bought offer works', $status === 200, "got $status");
 
 // ---------- Permissions ----------
@@ -220,7 +237,7 @@ check('A customer cannot delete offers (403)', $status === 403, "got $status");
 check("A customer cannot open someone else's order (404)", $status === 404, "got $status");
 
 $other->login('daniyar@mail.kz', 'user123');
-[, $result] = $other->request('GET', "api/reviews.php?productId={$hotel['id']}");
+[, $result] = $other->request('GET', "api/reviews.php?productId={$cinema['id']}");
 $myReviewId = null;
 foreach ($result['reviews'] as $review) {
     if (str_starts_with($review['author'], '<script>')) {
@@ -229,6 +246,27 @@ foreach ($result['reviews'] as $review) {
 }
 [$status] = $other->request('DELETE', 'api/reviews.php', ['reviewId' => $myReviewId]);
 check("A customer cannot delete someone else's review (403)", $myReviewId !== null && $status === 403, "got $status");
+
+// ---------- Help: feedback and partner requests ----------
+
+[$status, $result] = $customer->request('POST', 'api/messages.php',
+    ['type' => 'feedback', 'name' => 'Test', 'email' => $email, 'subject' => 'Hack', 'message' => 'short']);
+check('Feedback with an unknown subject and a short message is rejected (400)',
+    $status === 400 && isset($result['fields']['subject'], $result['fields']['message']), "got $status");
+
+[$status] = $customer->request('POST', 'api/messages.php',
+    ['type' => 'feedback', 'name' => 'Test User', 'email' => $email, 'subject' => 'Suggestion',
+     'message' => 'Please add gift certificates.']);
+check('Valid feedback is saved (201)', $status === 201, "got $status");
+
+[$status, $result] = $customer->request('POST', 'api/messages.php',
+    ['type' => 'business', 'name' => 'Test User', 'email' => $email, 'company' => '', 'phone' => '123',
+     'message' => 'We want to become a partner.']);
+check('Partner request without company and phone is rejected (400)',
+    $status === 400 && isset($result['fields']['company'], $result['fields']['phone']), "got $status");
+
+[$status] = $customer->request('GET', 'api/messages.php');
+check('A customer cannot read the messages (403)', $status === 403, "got $status");
 
 // ---------- Admin ----------
 
@@ -242,9 +280,9 @@ check('An admin cannot buy offers (403)', $status === 403, "got $status");
 check('Unknown order status is rejected (400)', $status === 400, "got $status");
 
 [$status] = $admin->request('PATCH', 'api/admin-orders.php', ['orderId' => $orderId, 'status' => 'Declined']);
-$hotelDeclined = productByName($guest, 'Hotel Weekend');
+$cinemaDeclined = productByName($guest, 'Cinema Tickets for Two');
 check('Declining an order gives the coupons back to the stock',
-    $status === 200 && $hotelDeclined['stock'] === $hotel['stock'], "stock {$hotelDeclined['stock']}");
+    $status === 200 && $cinemaDeclined['stock'] === $cinema['stock'], "stock {$cinemaDeclined['stock']}");
 
 [$status, $result] = $admin->request('GET', 'api/admin-orders.php?status=Declined&from=2026-01-01&to=2030-12-31');
 check('Orders can be filtered by status and date range', $status === 200 && $result['count'] >= 1);
@@ -254,7 +292,7 @@ check('An invalid date in the filter is rejected (400)', $status === 400, "got $
 
 [$status, $result] = $admin->request('POST', 'api/admin-products.php',
     ['id' => '0', 'name' => 'X', 'productNumber' => 'bad number!', 'price' => '-5', 'stock' => '1.5',
-     'categoryId' => '999', 'status' => 'Available'], true);
+     'maxPerCustomer' => '11', 'categoryId' => '999', 'status' => 'Available'], true);
 check('Creating an offer with invalid data returns field errors (400)',
     $status === 400 && count($result['fields'] ?? []) >= 4, 'fields: ' . implode(', ', array_keys($result['fields'] ?? [])));
 
@@ -262,13 +300,13 @@ $fakeImage = tempnam(sys_get_temp_dir(), 'img');
 file_put_contents($fakeImage, '<?php echo "hacked"; ?>');
 [$status, $result] = $admin->request('POST', 'api/admin-products.php',
     ['id' => '0', 'name' => 'Test Offer', 'productNumber' => 'T-' . time(), 'price' => '1000',
-     'stock' => '10', 'categoryId' => '1', 'status' => 'Available',
+     'stock' => '10', 'maxPerCustomer' => '2', 'categoryId' => '1', 'status' => 'Available',
      'image' => new CURLFile($fakeImage, 'image/png', 'shell.php.png')], true);
 check('A PHP file disguised as an image is rejected (400)', $status === 400 && isset($result['fields']['image']));
 
 [$status, $result] = $admin->request('POST', 'api/admin-products.php',
     ['id' => '0', 'name' => 'Test Offer', 'productNumber' => 'T-' . time(), 'price' => '1000',
-     'oldPrice' => '1500', 'stock' => '10', 'categoryId' => '1', 'status' => 'Available'], true);
+     'oldPrice' => '1500', 'stock' => '10', 'maxPerCustomer' => '2', 'categoryId' => '1', 'status' => 'Available'], true);
 $newProductId = $result['id'] ?? 0;
 check('Creating a valid offer works', $status === 200 && $newProductId > 0, "got $status");
 
@@ -277,6 +315,13 @@ check('Deleting an offer works', $status === 200, "got $status");
 
 [$status] = $admin->request('DELETE', 'api/admin-products.php', ['id' => $newProductId]);
 check('Deleting the same offer again returns 404', $status === 404, "got $status");
+
+[$status, $result] = $admin->request('GET', 'api/messages.php?type=feedback&status=New');
+$newMessage = $result['messages'][0] ?? null;
+check('Admin sees new feedback messages', $status === 200 && $newMessage !== null, "got $status");
+
+[$status] = $admin->request('PATCH', 'api/messages.php', ['id' => $newMessage['id'] ?? 0, 'status' => 'Answered']);
+check('Admin can mark a message as answered', $status === 200, "got $status");
 
 [$status] = $admin->request('DELETE', 'api/admin-users.php', ['id' => 1]);
 check('Admin accounts cannot be deleted (403)', $status === 403, "got $status");

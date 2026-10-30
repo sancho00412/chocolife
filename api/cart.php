@@ -6,33 +6,53 @@
 // Every answer contains the whole cart, so the page can redraw it.
 
 require __DIR__ . '/../includes/api.php';
+require __DIR__ . '/../includes/shop.php';
 
 $user = requireCustomer();
 $db = getDb();
 
 function sendCart(PDO $db, int $userId): void
 {
-    // Prices are always taken from products, so the cart shows the current price
-    $stmt = $db->prepare('
-        SELECT p.id, p.name, p.price, p.image, p.stock, p.status, ci.quantity,
-               p.price * ci.quantity AS subtotal
+    // Prices are always taken from products, so the cart shows the current price.
+    // The subquery counts coupons of each offer that the user bought before
+    $stmt = $db->prepare("
+        SELECT p.id, p.name, p.price, p.image, p.stock, p.status, p.max_per_customer, ci.quantity,
+               p.price * ci.quantity AS subtotal,
+               COALESCE(b.bought, 0) AS bought
         FROM cart_items ci
         JOIN products p ON p.id = ci.product_id
+        LEFT JOIN (
+            SELECT oi.product_id, SUM(oi.quantity) AS bought
+            FROM order_items oi
+            JOIN orders o ON o.id = oi.order_id
+            WHERE o.user_id = ? AND o.status <> 'Declined'
+            GROUP BY oi.product_id
+        ) b ON b.product_id = p.id
         WHERE ci.user_id = ?
         ORDER BY ci.added_at, ci.id
-    ');
-    $stmt->execute([$userId]);
+    ");
+    $stmt->execute([$userId, $userId]);
 
-    $items = array_map(fn(array $row) => [
-        'productId' => (int) $row['id'],
-        'name'      => $row['name'],
-        'price'     => (float) $row['price'],
-        'image'     => $row['image'],
-        'stock'     => (int) $row['stock'],
-        'available' => $row['status'] === 'Available' && (int) $row['stock'] >= (int) $row['quantity'],
-        'quantity'  => (int) $row['quantity'],
-        'subtotal'  => (float) $row['subtotal'],
-    ], $stmt->fetchAll());
+    $items = array_map(function (array $row) {
+        $max = maxQuantity((int) $row['stock'], (int) $row['max_per_customer'], (int) $row['bought']);
+        $available = $row['status'] === 'Available' && (int) $row['quantity'] <= $max;
+
+        return [
+            'productId'      => (int) $row['id'],
+            'name'           => $row['name'],
+            'price'          => (float) $row['price'],
+            'image'          => $row['image'],
+            'maxQuantity'    => $max,
+            'maxPerCustomer' => (int) $row['max_per_customer'],
+            'available'      => $available,
+            // Why this item blocks the checkout
+            'problem'        => $available ? null : ($row['status'] !== 'Available'
+                ? 'This offer is no longer available. Please remove it.'
+                : limitMessage($row['name'], (int) $row['stock'], (int) $row['max_per_customer'], (int) $row['bought'])),
+            'quantity'       => (int) $row['quantity'],
+            'subtotal'       => (float) $row['subtotal'],
+        ];
+    }, $stmt->fetchAll());
 
     sendJson([
         'success' => true,
@@ -42,10 +62,10 @@ function sendCart(PDO $db, int $userId): void
     ]);
 }
 
-// Checks the offer and the wanted quantity, returns the product row
-function checkQuantity(PDO $db, int $productId, int $quantity): array
+// Checks the offer and the wanted quantity in the cart
+function checkQuantity(PDO $db, int $userId, int $productId, int $quantity): void
 {
-    $stmt = $db->prepare('SELECT id, stock, status FROM products WHERE id = ?');
+    $stmt = $db->prepare('SELECT name, stock, status, max_per_customer FROM products WHERE id = ?');
     $stmt->execute([$productId]);
     $product = $stmt->fetch();
 
@@ -56,15 +76,12 @@ function checkQuantity(PDO $db, int $productId, int $quantity): array
         sendError('This offer is currently unavailable.', 409);
     }
 
-    $max = min(99, (int) $product['stock']);
+    $bought = boughtQuantity($db, $userId, $productId);
+    $max    = maxQuantity((int) $product['stock'], (int) $product['max_per_customer'], $bought);
 
-    if ($quantity < 1 || $quantity > $max) {
-        sendError($max > 0
-            ? "Quantity must be from 1 to $max."
-            : 'This offer is sold out.', 409);
+    if ($quantity > $max) {
+        sendError(limitMessage($product['name'], (int) $product['stock'], (int) $product['max_per_customer'], $bought), 409);
     }
-
-    return $product;
 }
 
 switch ($_SERVER['REQUEST_METHOD']) {
@@ -85,7 +102,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $stmt->execute([$user['id'], $productId]);
         $inCart = (int) $stmt->fetchColumn();
 
-        checkQuantity($db, $productId, $inCart + $quantity);
+        checkQuantity($db, $user['id'], $productId, $inCart + $quantity);
 
         $stmt = $db->prepare('
             INSERT INTO cart_items (user_id, product_id, quantity)
@@ -101,7 +118,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $productId = (int) ($data['productId'] ?? 0);
         $quantity  = (int) ($data['quantity'] ?? 0);
 
-        checkQuantity($db, $productId, $quantity);
+        if ($quantity < 1) {
+            sendError('Quantity must be at least 1.');
+        }
+
+        checkQuantity($db, $user['id'], $productId, $quantity);
 
         $stmt = $db->prepare('UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?');
         $stmt->execute([$quantity, $user['id'], $productId]);

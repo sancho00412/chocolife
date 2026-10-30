@@ -4,16 +4,13 @@
 ?>
         </main>
 
-        <footer class="admin-footer">
-            © 2026 Chocolife Admin Panel
-        </footer>
     </div>
 </div>
 
-<script src="common.js"></script>
-<script src="admin.js"></script>
+<script src="<?= asset('common.js') ?>"></script>
+<script src="<?= asset('admin.js') ?>"></script>
 <?php foreach ($pageScripts as $script): ?>
-<script src="<?= e($script) ?>"></script>
+<script src="<?= e(asset($script)) ?>"></script>
 <?php endforeach; ?>
 
 </body>

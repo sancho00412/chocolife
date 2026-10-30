@@ -14,14 +14,15 @@
             <a href="cart.php">Cart</a>
 <?php endif; ?>
             <a href="profile.php">My Profile</a>
+            <a href="about.php">About us</a>
         </nav>
 
-        <p>© 2026 Chocolife. All rights reserved.</p>
+        <p>Support: <b><?= SUPPORT_PHONE ?></b></p>
     </footer>
 
-    <script src="common.js"></script>
+    <script src="<?= asset('common.js') ?>"></script>
 <?php foreach ($pageScripts as $script): ?>
-    <script src="<?= e($script) ?>"></script>
+    <script src="<?= e(asset($script)) ?>"></script>
 <?php endforeach; ?>
 
 </body>

@@ -27,7 +27,13 @@ CREATE TABLE partners (
     name    VARCHAR(100) NOT NULL,
     city    VARCHAR(50)  NOT NULL DEFAULT 'Almaty',
     address VARCHAR(200) NULL,
-    phone   VARCHAR(20)  NULL
+    phone   VARCHAR(20)  NULL,
+    -- Coordinates for the 2GIS map on the offer page
+    latitude  DECIMAL(9,6) NULL,
+    longitude DECIMAL(9,6) NULL,
+
+    CONSTRAINT chk_partners_latitude CHECK (latitude IS NULL OR latitude BETWEEN -90 AND 90),
+    CONSTRAINT chk_partners_longitude CHECK (longitude IS NULL OR longitude BETWEEN -180 AND 180)
 ) ENGINE=InnoDB;
 
 -- 4. Products (offers)
@@ -39,9 +45,13 @@ CREATE TABLE products (
     price          DECIMAL(10,2) NOT NULL,
     old_price      DECIMAL(10,2) NULL,
     stock          INT NOT NULL DEFAULT 100,
+    max_per_customer TINYINT NOT NULL DEFAULT 1,
     status         ENUM('Available', 'Unavailable') NOT NULL DEFAULT 'Available',
     image          VARCHAR(255) NULL,
-    valid_until    DATE NULL,
+    image_credit   VARCHAR(255) NULL,   -- author and license of the photo
+    image_source   VARCHAR(255) NULL,   -- link to the original photo
+    valid_until    DATE NULL,   -- the coupon can be bought until this day
+    use_until      DATE NULL,   -- the coupon can be used until this day
     category_id    INT NOT NULL,
     partner_id     INT NULL,
     created_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -49,6 +59,8 @@ CREATE TABLE products (
     CONSTRAINT chk_products_price CHECK (price >= 0),
     CONSTRAINT chk_products_old_price CHECK (old_price IS NULL OR old_price >= price),
     CONSTRAINT chk_products_stock CHECK (stock >= 0),
+    CONSTRAINT chk_products_max_per_customer CHECK (max_per_customer BETWEEN 1 AND 10),
+    CONSTRAINT chk_products_use_until CHECK (use_until IS NULL OR valid_until IS NULL OR use_until >= valid_until),
 
     CONSTRAINT fk_products_category FOREIGN KEY (category_id)
         REFERENCES categories(id) ON DELETE RESTRICT,
@@ -140,6 +152,24 @@ CREATE TABLE favorites (
         REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_favorites_product FOREIGN KEY (product_id)
         REFERENCES products(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- 10. Messages from the Help pages: feedback and partner requests
+CREATE TABLE messages (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    user_id    INT NULL,
+    type       ENUM('feedback', 'business') NOT NULL,
+    name       VARCHAR(100) NOT NULL,
+    email      VARCHAR(100) NOT NULL,
+    phone      VARCHAR(20)  NULL,
+    company    VARCHAR(150) NULL,
+    subject    VARCHAR(150) NULL,
+    message    TEXT NOT NULL,
+    status     ENUM('New', 'Answered') NOT NULL DEFAULT 'New',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_messages_user FOREIGN KEY (user_id)
+        REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- Indexes for frequent filters and reports

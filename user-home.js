@@ -8,6 +8,15 @@ const noResults = document.querySelector('#user-no-results');
 const catalogStatus = document.querySelector('#catalog-status');
 const pagination = document.querySelector('#user-pagination');
 
+// Icons for offers without a photo, the same as on the offer page
+const categoryIcons = {
+    Beauty: 'spa',
+    Food: 'restaurant',
+    Entertainment: 'movie',
+    Travel: 'flight',
+    Fitness: 'fitness_center'
+};
+
 let currentPage = 1;
 let searchTimer = null;
 let lastRequestId = 0;
@@ -91,6 +100,7 @@ function renderProducts(products) {
         card.tabIndex = 0;
 
         const image = document.createElement('div');
+        image.className = `user-product-image user-product-image-placeholder category-${product.category.toLowerCase()}`;
 
         if (product.image) {
             const img = document.createElement('img');
@@ -99,13 +109,17 @@ function renderProducts(products) {
             img.alt = product.name;
             image.appendChild(img);
         } else {
-            image.className =
-                'user-product-image user-product-image-placeholder';
-
             const icon = document.createElement('span');
             icon.className = 'material-symbols-outlined';
-            icon.textContent = 'local_offer';
+            icon.textContent = categoryIcons[product.category] || 'local_offer';
             image.appendChild(icon);
+        }
+
+        if (product.oldPrice) {
+            const discount = document.createElement('span');
+            discount.className = 'card-discount';
+            discount.textContent = `-${Math.round((1 - product.price / product.oldPrice) * 100)}%`;
+            image.appendChild(discount);
         }
 
         const info = document.createElement('div');
@@ -128,7 +142,11 @@ function renderProducts(products) {
             price.appendChild(oldPrice);
         }
 
-        info.append(name, description, price);
+        const bought = document.createElement('span');
+        bought.className = 'user-product-bought';
+        bought.textContent = `${product.sold} bought`;
+
+        info.append(name, description, price, bought);
 
         if (product.reviewCount > 0) {
             const rating = document.createElement('span');

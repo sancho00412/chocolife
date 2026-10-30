@@ -1,0 +1,223 @@
+/* Help pages: FAQ, feedback, for business */
+
+.help-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2.5rem 5%;
+}
+
+.help-intro {
+    margin-bottom: 1.5rem;
+}
+
+.help-intro h1 {
+    margin-bottom: 0.6rem;
+    font-size: 2rem;
+}
+
+.help-intro p {
+    color: #687086;
+    line-height: 1.6;
+}
+
+.help-intro a {
+    color: #6268ed;
+    font-weight: 600;
+}
+
+.help-card {
+    margin-bottom: 1.5rem;
+    padding: 1.6rem;
+    border: 1px solid #e7e9f2;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 8px 25px rgba(32, 36, 58, 0.05);
+}
+
+.help-card h2 {
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+/* FAQ: click a question to open the answer */
+
+.faq-item {
+    border-top: 1px solid #eceef5;
+}
+
+.faq-item summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 14px 0;
+    font-weight: 600;
+    list-style: none;
+    cursor: pointer;
+}
+
+.faq-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-item summary::after {
+    content: "+";
+    color: #6268ed;
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
+.faq-item[open] summary::after {
+    content: "−";
+}
+
+.faq-item p {
+    padding-bottom: 14px;
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+/* Forms */
+
+.help-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.help-form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-field label {
+    font-weight: 600;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+    padding: 12px 14px;
+    border: 1px solid #dfe2ed;
+    border-radius: 10px;
+    background: #fff;
+    color: #20243a;
+    font: inherit;
+}
+
+.form-field textarea {
+    resize: vertical;
+}
+
+.field-error {
+    color: #e74c3c;
+    font-size: 0.85rem;
+}
+
+.help-form button[type="submit"] {
+    justify-self: start;
+    padding: 13px 26px;
+    border: none;
+    border-radius: 10px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.help-form button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+/* For business */
+
+.business-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.business-stats div {
+    padding: 1.2rem;
+    border-radius: 16px;
+    background: #fff;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(32, 36, 58, 0.05);
+}
+
+.business-stats strong {
+    display: block;
+    color: #f5234b;
+    font-size: 1.8rem;
+}
+
+.business-stats span {
+    color: #687086;
+}
+
+.business-steps ol {
+    display: grid;
+    gap: 10px;
+    margin-left: 1.2rem;
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+/* About us */
+
+.about-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.about-text {
+    color: #4b5563;
+    line-height: 1.7;
+}
+
+.about-text a {
+    color: #6268ed;
+    font-weight: 600;
+}
+
+.about-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    list-style: none;
+}
+
+.about-categories li {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px;
+    border-radius: 12px;
+    background: #f7f8fc;
+}
+
+.about-categories .material-symbols-outlined {
+    color: #6268ed;
+    font-size: 1.8rem;
+}
+
+.about-categories span:last-child {
+    color: #687086;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 650px) {
+    .about-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .help-form-row,
+    .business-stats {
+        grid-template-columns: 1fr;
+    }
+}

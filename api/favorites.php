@@ -49,7 +49,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
             $isFavorite = true;
         }
 
-        sendJson(['success' => true, 'isFavorite' => $isFavorite]);
+        $stmt = $db->prepare('SELECT COUNT(*) FROM favorites WHERE user_id = ?');
+        $stmt->execute([$user['id']]);
+
+        sendJson(['success' => true, 'isFavorite' => $isFavorite, 'count' => (int) $stmt->fetchColumn()]);
 
     default:
         sendError('Method not allowed.', 405);

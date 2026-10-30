@@ -12,7 +12,8 @@ $stats = $db->query("
         (SELECT COUNT(*) FROM orders WHERE status = 'Pending')                 AS orders_pending,
         (SELECT COUNT(*) FROM users WHERE role = 'user')                       AS customers,
         (SELECT COALESCE(AVG(total), 0) FROM orders WHERE status = 'Completed') AS avg_order,
-        (SELECT COUNT(*) FROM products WHERE status = 'Available')             AS offers_active
+        (SELECT COUNT(*) FROM products WHERE status = 'Available')             AS offers_active,
+        (SELECT COUNT(*) FROM messages WHERE status = 'New')                   AS new_messages
 ")->fetch();
 
 // Revenue of this month compared with the previous month (date-based query)
@@ -47,6 +48,13 @@ $pageScripts = [];
 
 require __DIR__ . '/includes/admin-header.php';
 ?>
+
+<?php if ((int) $stats['new_messages'] > 0): ?>
+<a href="admin-messages.php?status=New" class="alert alert-new">
+    <span class="material-symbols-outlined">mark_email_unread</span>
+    You have <?= (int) $stats['new_messages'] ?> new message(s) from customers and partners. Open messages →
+</a>
+<?php endif; ?>
 
 <section class="stat-grid" aria-label="Key numbers">
     <article class="stat-card">

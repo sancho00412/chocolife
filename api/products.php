@@ -6,7 +6,7 @@ require __DIR__ . '/../includes/api.php';
 
 requireMethod('GET');
 
-const PER_PAGE = 8;
+const PER_PAGE = 12;
 
 $search     = is_string($_GET['search'] ?? null) ? trim($_GET['search']) : '';
 $categoryId = (int) ($_GET['category'] ?? 0);
@@ -69,7 +69,7 @@ $offset     = ($page - 1) * PER_PAGE;
 // Subqueries with GROUP BY count the average rating and the number of sold coupons
 $stmt = $db->prepare("
     SELECT p.id, p.product_number, p.name, p.description, p.price, p.old_price,
-           p.stock, p.status, p.image, p.valid_until,
+           p.stock, p.max_per_customer, p.status, p.image, p.valid_until,
            c.name AS category,
            pr.name AS partner,
            COALESCE(r.avg_rating, 0)   AS avg_rating,
@@ -104,6 +104,7 @@ $products = array_map(fn(array $row) => [
     'price'         => (float) $row['price'],
     'oldPrice'      => $row['old_price'] === null ? null : (float) $row['old_price'],
     'stock'         => (int) $row['stock'],
+    'maxPerCustomer' => (int) $row['max_per_customer'],
     'status'        => $row['status'],
     'image'         => $row['image'],
     'validUntil'    => $row['valid_until'],

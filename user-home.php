@@ -12,14 +12,6 @@ $categories = getDb()->query("
     ORDER BY c.name
 ")->fetchAll();
 
-$categoryIcons = [
-    'Beauty'        => 'spa',
-    'Food'          => 'restaurant',
-    'Entertainment' => 'movie',
-    'Travel'        => 'flight',
-    'Fitness'       => 'fitness_center',
-];
-
 $pageTitle   = 'Home';
 $activePage  = 'home';
 $pageCss     = ['user-home.css'];
@@ -95,7 +87,7 @@ require __DIR__ . '/includes/header.php';
             <div class="category-grid">
 <?php foreach ($categories as $category): ?>
                 <button type="button" class="category-card" data-category-id="<?= $category['id'] ?>">
-                    <span class="material-symbols-outlined"><?= $categoryIcons[$category['name']] ?? 'local_offer' ?></span>
+                    <span class="material-symbols-outlined"><?= categoryIcon($category['name']) ?></span>
                     <h3><?= e($category['name']) ?></h3>
                     <p><?= (int) $category['offers'] ?> offer(s)</p>
                 </button>

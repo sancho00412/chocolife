@@ -7,8 +7,12 @@ $adminLinks = [
     'orders'    => ['admin-orders.php',   'receipt_long', 'Orders'],
     'products'  => ['admin-products.php', 'inventory_2', 'Offers'],
     'users'     => ['admin-users.php',    'groups',      'Users'],
+    'messages'  => ['admin-messages.php', 'mail',        'Messages'],
     'reports'   => ['admin-reports.php',  'analytics',   'Reports'],
 ];
+
+// New feedback and partner requests: shown as a red counter next to "Messages"
+$newMessages = (int) getDb()->query("SELECT COUNT(*) FROM messages WHERE status = 'New'")->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,10 +24,10 @@ $adminLinks = [
 
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="<?= asset('admin.css') ?>">
 
     <!-- Applies the saved light/dark theme before the page is drawn -->
-    <script src="theme.js"></script>
+    <script src="<?= asset('theme.js') ?>"></script>
 </head>
 <body>
 
@@ -45,6 +49,9 @@ $adminLinks = [
             <a href="<?= $href ?>" class="<?= $activePage === $key ? 'active' : '' ?>">
                 <span class="material-symbols-outlined"><?= $icon ?></span>
                 <?= $label ?>
+<?php if ($key === 'messages' && $newMessages > 0): ?>
+                <span class="nav-badge" title="New messages"><?= $newMessages ?></span>
+<?php endif; ?>
             </a>
 <?php endforeach; ?>
 

@@ -1,6 +1,24 @@
 /* Shared styles for user pages with the PHP header and footer.
    Loaded last, so it can fix colors forced by brand-theme.css. */
 
+/* Page background: light beige. Header, footer and cards stay white.
+   Older files force white with !important, so these selectors are more specific */
+:root {
+    --page-background: #fbf7f0;
+}
+
+html:root,
+html:root body,
+html:root body > main {
+    background: var(--page-background) !important;
+    background-image: none !important;
+}
+
+html:root body > .user-header,
+html:root body > .user-footer {
+    background: #fff !important;
+}
+
 /* Text for screen readers only */
 .visually-hidden {
     position: absolute;
@@ -32,6 +50,165 @@
 
 .cart-link.active {
     box-shadow: 0 0 0 3px #ffd2dc;
+}
+
+/* "Help" menu in the header */
+.help-dropdown {
+    position: relative;
+}
+
+.help-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.55rem 1rem;
+    border: none !important;
+    border-radius: 999px;
+    background: #f9dc3c !important;
+    color: #20243a !important;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.help-button:hover {
+    background: #f3d01d !important;
+}
+
+.help-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    z-index: 20;
+    width: 340px;
+    padding: 6px 0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 12px 35px rgba(32, 36, 58, 0.15);
+}
+
+.help-menu[hidden] {
+    display: none;
+}
+
+.help-item {
+    display: block;
+    padding: 12px 20px;
+    border-bottom: 1px solid #eceef5;
+}
+
+.help-item:last-child {
+    border-bottom: none;
+}
+
+.help-item:hover {
+    background: #f7f8fc;
+}
+
+.help-item-title {
+    display: block;
+    color: #20243a;
+    font-size: 1.05rem;
+}
+
+.help-item-subtitle {
+    display: block;
+    margin-top: 3px;
+    color: #8a8fa3;
+    font-size: 0.82rem;
+}
+
+/* The page you are on: bold with a red dot */
+.help-item.current .help-item-title {
+    font-weight: 700;
+}
+
+.help-item.current .help-item-title::before {
+    content: "•";
+    margin-right: 6px;
+    color: #f5234b;
+}
+
+/* Support phone in the header */
+.phone-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    background: #f1f2f6;
+    color: #20243a;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.phone-link .material-symbols-outlined {
+    font-size: 1.15rem;
+}
+
+.user-footer p b {
+    color: #20243a;
+}
+
+/* Saved offers link with a heart in the header */
+.favorites-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid #ffd2dc;
+    border-radius: 10px;
+    color: #f5234b;
+    font-weight: 700;
+}
+
+.favorites-link .material-symbols-outlined {
+    font-variation-settings: 'FILL' 1;
+}
+
+#favorites-badge {
+    margin-left: 2px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: #f5234b;
+    color: #fff;
+    font-size: 0.8rem;
+}
+
+.favorites-link:hover,
+.favorites-link.active {
+    background: #fff0f3;
+}
+
+/* Saved offers page */
+.favorite-card-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.favorite-remove {
+    display: inline-flex;
+    margin-left: auto;
+    padding: 6px;
+    border: 1px solid #ffd2dc !important;
+    border-radius: 50%;
+    background: #fff !important;
+    color: #f5234b !important;
+    cursor: pointer;
+}
+
+.favorite-remove:hover {
+    background: #fff0f3 !important;
+}
+
+.profile-all-link {
+    display: inline-block;
+    margin-top: 12px;
+    color: #6268ed;
+    font-weight: 600;
 }
 
 /* Footer */
@@ -73,6 +250,38 @@
 .page-status a {
     color: #6268ed;
     font-weight: 600;
+}
+
+/* Colored placeholders for offers without a photo */
+.category-beauty        { background: linear-gradient(135deg, #f9a8d4, #c084fc); }
+.category-food          { background: linear-gradient(135deg, #fdba74, #f87171); }
+.category-entertainment { background: linear-gradient(135deg, #818cf8, #6268ed); }
+.category-travel        { background: linear-gradient(135deg, #67e8f9, #3b82f6); }
+.category-fitness       { background: linear-gradient(135deg, #86efac, #10b981); }
+
+/* Discount badge in the corner of an offer card */
+.card-discount {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 4px 12px;
+    border-bottom-right-radius: 10px;
+    background: #f9dc3c;
+    color: #20243a;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.user-product-image {
+    position: relative;
+    color: #fff !important;
+}
+
+.user-product-bought {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: #9ca3af;
+    font-size: 0.85rem;
 }
 
 /* Category cards are buttons: keep them white */
@@ -140,6 +349,55 @@ button.category-card {
     font-variation-settings: 'FILL' 1;
 }
 
+.twogis-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    color: #19aa1e;
+    font-weight: 600;
+}
+
+.twogis-link .material-symbols-outlined {
+    font-size: 1.1rem;
+}
+
+.partner-map {
+    width: 100%;
+    height: 340px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #eef0ff;
+    color: #687086;
+}
+
+/* Explains why there is no review form */
+.review-notice {
+    display: flex;
+    gap: 12px;
+    max-width: 640px;
+    margin-bottom: 1.5rem;
+    padding: 14px 18px;
+    border: 1px solid #e0e3f0;
+    border-radius: 14px;
+    background: #f7f8fc;
+}
+
+.review-notice[hidden] {
+    display: none;
+}
+
+.review-notice > .material-symbols-outlined {
+    color: #6268ed;
+    font-size: 1.8rem;
+}
+
+.review-notice p {
+    margin-top: 4px;
+    color: #687086;
+    line-height: 1.5;
+}
+
 .review-delete {
     background: #fff !important;
     color: #e74c3c !important;
@@ -173,6 +431,19 @@ button.category-card {
 .cart-item-warning {
     margin-top: 8px;
     color: #e74c3c;
+}
+
+.cart-item-limit {
+    margin-top: 6px;
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+.offer-limit-note {
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #fff4dc;
+    color: #8a5a00;
 }
 
 .remove-item {
@@ -270,6 +541,12 @@ details.profile-order summary::-webkit-details-marker {
 /* Small screens */
 
 @media (max-width: 600px) {
+    .help-menu {
+        left: 50%;
+        width: min(340px, 90vw);
+        transform: translateX(-50%);
+    }
+
     .user-header {
         padding: 1rem 16px;
     }

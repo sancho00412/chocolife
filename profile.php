@@ -122,6 +122,7 @@ require __DIR__ . '/includes/header.php';
 
                     <p id="favorites-status" class="page-status" role="status">Loading saved offers...</p>
                     <ul id="profile-favorites" class="profile-favorites"></ul>
+                    <a href="favorites.php" class="profile-all-link">Open saved offers →</a>
                 </section>
             </div>
 <?php else: ?>

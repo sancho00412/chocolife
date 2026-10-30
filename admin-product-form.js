@@ -65,6 +65,12 @@ if (productForm) {
         if (!/^\d+$/.test(stock)) {
             errors.stock = 'Stock must be a whole number.';
         }
+        if (!/^([1-9]|10)$/.test(data.get('maxPerCustomer'))) {
+            errors.maxPerCustomer = 'Limit must be a whole number from 1 to 10.';
+        }
+        if (data.get('validUntil') && data.get('useUntil') && data.get('useUntil') < data.get('validUntil')) {
+            errors.useUntil = 'The coupon cannot expire before the sale ends.';
+        }
         if (!data.get('categoryId')) {
             errors.categoryId = 'Choose a category.';
         }

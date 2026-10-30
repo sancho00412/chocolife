@@ -69,6 +69,8 @@ require __DIR__ . '/includes/admin-header.php';
             <tbody id="orders-body"></tbody>
         </table>
     </div>
+
+    <nav id="orders-pagination" class="pagination" aria-label="Orders pages"></nav>
 </section>
 
 <?php require __DIR__ . '/includes/admin-footer.php'; ?>

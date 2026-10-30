@@ -3,6 +3,7 @@
 // POST {customerName, email, phone, address}   -> place an order from my cart
 
 require __DIR__ . '/../includes/api.php';
+require __DIR__ . '/../includes/shop.php';
 
 $user = requireCustomer();
 $db = getDb();
@@ -93,7 +94,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
             // FOR UPDATE locks these products until COMMIT,
             // so two customers cannot buy the last coupon at the same time
             $stmt = $db->prepare('
-                SELECT p.id, p.name, p.price, p.stock, p.status, ci.quantity
+                SELECT p.id, p.name, p.price, p.stock, p.status, p.max_per_customer, ci.quantity
                 FROM cart_items ci
                 JOIN products p ON p.id = ci.product_id
                 WHERE ci.user_id = ?
@@ -113,8 +114,16 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 if ($item['status'] !== 'Available') {
                     throw new RuntimeException("\"{$item['name']}\" is no longer available. Please remove it from the cart.");
                 }
-                if ((int) $item['stock'] < (int) $item['quantity']) {
-                    throw new RuntimeException("Only {$item['stock']} coupon(s) of \"{$item['name']}\" left.");
+
+                // Stock and the per-customer limit are checked again: they could change
+                // since the offer was put into the cart (other customers, earlier orders)
+                $bought = boughtQuantity($db, $user['id'], (int) $item['id']);
+                $max    = maxQuantity((int) $item['stock'], (int) $item['max_per_customer'], $bought);
+
+                if ((int) $item['quantity'] > $max) {
+                    throw new RuntimeException(
+                        limitMessage($item['name'], (int) $item['stock'], (int) $item['max_per_customer'], $bought)
+                    );
                 }
 
                 $total += $item['price'] * $item['quantity'];

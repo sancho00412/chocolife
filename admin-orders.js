@@ -4,6 +4,7 @@ const ordersBody = document.querySelector('#orders-body');
 const ordersSummary = document.querySelector('#orders-summary');
 const filterForm = document.querySelector('#orders-filter');
 const searchInput = document.querySelector('#orders-search');
+const ordersPagination = document.querySelector('#orders-pagination');
 
 const filters = {
     search: searchInput,
@@ -13,12 +14,13 @@ const filters = {
     sort: document.querySelector('#orders-sort')
 };
 
+let ordersPage = 1;
 let searchTimer = null;
 let lastRequestId = 0;
 
 async function loadOrders() {
     const requestId = ++lastRequestId;
-    const params = new URLSearchParams();
+    const params = new URLSearchParams({ page: ordersPage });
 
     Object.entries(filters).forEach(([name, input]) => {
         params.set(name, input.value.trim());
@@ -42,7 +44,9 @@ async function loadOrders() {
             ? `${result.count} order(s) for ${formatPrice(result.sum)}`
             : 'No orders match the filters.';
 
+        ordersPage = result.page;
         renderOrders(result.orders);
+        renderOrdersPagination(result.page, result.totalPages);
     } catch (error) {
         if (requestId !== lastRequestId) {
             return;
@@ -51,7 +55,52 @@ async function loadOrders() {
         ordersSummary.textContent = error.message || 'Could not load orders.';
         ordersSummary.classList.add('error');
         ordersBody.innerHTML = '';
+        ordersPagination.innerHTML = '';
     }
+}
+
+// Prev, the pages around the current one, Next
+function renderOrdersPagination(page, totalPages) {
+    ordersPagination.innerHTML = '';
+
+    if (totalPages <= 1) {
+        return;
+    }
+
+    const addButton = (label, target, disabled = false, active = false) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = label;
+        button.disabled = disabled;
+
+        if (active) {
+            button.classList.add('active');
+            button.setAttribute('aria-current', 'page');
+        }
+
+        button.addEventListener('click', () => {
+            ordersPage = target;
+            loadOrders();
+        });
+
+        ordersPagination.appendChild(button);
+    };
+
+    addButton('‹', page - 1, page === 1);
+
+    const first = Math.max(1, page - 3);
+    const last = Math.min(totalPages, page + 3);
+
+    for (let i = first; i <= last; i++) {
+        addButton(String(i), i, false, i === page);
+    }
+
+    addButton('›', page + 1, page === totalPages);
+
+    const info = document.createElement('span');
+    info.className = 'text-muted';
+    info.textContent = `Page ${page} of ${totalPages}`;
+    ordersPagination.appendChild(info);
 }
 
 function renderOrders(orders) {
@@ -169,11 +218,17 @@ filterForm.addEventListener('submit', event => event.preventDefault());
 
 searchInput.addEventListener('input', () => {
     clearTimeout(searchTimer);
-    searchTimer = setTimeout(loadOrders, 300);
+    searchTimer = setTimeout(() => {
+        ordersPage = 1;
+        loadOrders();
+    }, 300);
 });
 
 [filters.status, filters.from, filters.to, filters.sort].forEach(input => {
-    input.addEventListener('change', loadOrders);
+    input.addEventListener('change', () => {
+        ordersPage = 1;
+        loadOrders();
+    });
 });
 
 loadOrders();

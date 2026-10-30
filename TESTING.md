@@ -6,7 +6,7 @@
 
 ```
 C:\xampp\php\php.exe database\seed.php       # fresh test data
-C:\xampp\php\php.exe tests\api-tests.php     # 47 checks
+C:\xampp\php\php.exe tests\api-tests.php     # 57 checks
 C:\xampp\php\php.exe database\seed.php       # remove the data the tests created
 ```
 
@@ -20,12 +20,14 @@ C:\xampp\php\php.exe database\seed.php       # remove the data the tests created
 | 4 | Login, invalid | Log in with a wrong password | `aruzhan@mail.kz` / `wrong` | "Incorrect email or password" (401), same text as for an unknown email |
 | 5 | Access control | Open `user-home.php` without logging in | — | Redirect to `login.html` |
 | 6 | Access control | Log in as a customer, open `admin.php` | — | Redirect to the catalog; admin API answers 403 |
-| 7 | Catalog | Search `spa`, then `zzz` | — | 1 offer; then "No offers found" |
-| 8 | Catalog | Sort by "Price: low to high", go to page 2 | — | Cheapest first; page 2 shows 4 offers |
-| 9 | Cart, missing stock | Add more Hotel Weekend coupons than in stock | quantity 4 (stock 3) | "Quantity must be from 1 to 3" |
+| 7 | Catalog | Search `bowling`, then `zzz` | — | 1 offer; then "No offers found" |
+| 8 | Catalog | Sort by "Price: low to high", go to page 5 | — | Cheapest first (Coffee and Dessert, 2,500 ₸); page 5 shows the last 2 of 50 offers |
+| 9 | Cart, missing stock | Add more Quest Room coupons than in stock | quantity 2 (stock 1) | "Only 1 coupon(s) of \"Quest Room\" left." |
+| 9a | Limit per customer | Add 3 cinema coupons, then 2; place the order; try to add 1 more | cinema (limit 2) | 3 rejected; 2 added; after the order "You have already bought the maximum of 2 coupon(s)…" |
+| 9b | Limit per customer | Add 2 Hotel Weekend coupons | hotel (limit 1) | "…is limited to 1 coupon(s) per customer" |
 | 10 | Cart, unavailable | Open Ski Day Pass | — | No "Add to Cart" button; API answers 409 |
 | 11 | Checkout, invalid | Place an order with a wrong phone and a short address | phone `abc`, address `A` | Errors under both fields, nothing saved |
-| 12 | Checkout, transaction | Place a valid order | 2 × Hotel Weekend | Order created, stock 3 → 1, cart empty |
+| 12 | Checkout, transaction | Place a valid order | 2 × Cinema Tickets | Order created, stock 120 → 118, cart empty |
 | 13 | Checkout, empty cart | Send the order request again | — | "Your cart is empty" (409) |
 | 14 | Reviews, business rule | Review an offer you did not buy | Yoga Course | "Only customers who bought this offer can leave a review" (403) |
 | 15 | Reviews, boundary | Send rating 6 to the API | rating `6` | "Please choose a rating from 1 to 5" (400) |
